@@ -40,6 +40,34 @@ impl Colorizer {
             ColorChoice::Never => anstream::ColorChoice::Never,
         };
 
+        #[cfg(all(
+            any(feature = "unstable-web-alert", feature = "unstable-web-console"),
+            target_arch = "wasm32"
+        ))]
+        {
+            use std::io::Write;
+
+            // plain text without color control codes.
+            let msg = format!("{}", self);
+
+            match self.stream {
+                Stream::Stderr => {
+                    let mut writer = cliw::system::stderr();
+                    // msg is plain text without color control codes.
+                    let _ = writer.write(msg.as_bytes());
+                    // use color control codes.
+                    // let _ = self.content.write_to(&mut writer);
+                }
+                Stream::Stdout => {
+                    let mut writer = cliw::system::stdout();
+                    // msg is plain text without color control codes.
+                    let _ = writer.write(msg.as_bytes());
+                    // use color control codes.
+                    // let _ = self.content.write_to(&mut writer);
+                }
+            };
+        }
+
         let mut stdout;
         let mut stderr;
         let writer: &mut dyn std::io::Write = match self.stream {
@@ -60,6 +88,22 @@ impl Colorizer {
     pub(crate) fn print(&self) -> std::io::Result<()> {
         // [e]println can't be used here because it panics
         // if something went wrong. We don't want that.
+
+        #[cfg(all(
+            any(feature = "unstable-web-alert", feature = "unstable-web-console"),
+            target_arch = "wasm32"
+        ))]
+        match self.stream {
+            Stream::Stdout => {
+                let mut writer = cliw::system::stdout();
+                let _ = self.content.write_to(&mut writer);
+            }
+            Stream::Stderr => {
+                let mut writer = cliw::system::stderr();
+                let _ = self.content.write_to(&mut writer);
+            }
+        }
+
         match self.stream {
             Stream::Stdout => {
                 let stdout = std::io::stdout();

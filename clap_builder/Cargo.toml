@@ -54,6 +54,10 @@ string = []  # Allow runtime generated strings
 unstable-v5 = ["deprecated"]
 unstable-styles = ["color"]
 
+unstable-web-alert = ["cliw/alert"] # output to a popup alert on web/wasm
+unstable-web-console = ["cliw/console"] # output to console log on web/wasm
+unstable-web-urlargs = ["cliw/urlargs"] # get args from url
+
 [lib]
 bench = false
 
@@ -66,6 +70,7 @@ anstyle = "1.0.0"
 terminal_size = { version = "0.3.0", optional = true }
 backtrace = { version = "0.3.67", optional = true }
 unicode-width = { version = "0.1.9", optional = true }
+cliw = { path = "../../cliw" }
 
 [dev-dependencies]
 static_assertions = "1.1.0"

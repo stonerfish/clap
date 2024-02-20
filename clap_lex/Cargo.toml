@@ -28,3 +28,9 @@ pre-release-replacements = [
 
 [lib]
 bench = false
+
+[features]
+unstable-web-urlargs = ["cliw/urlargs"] # get args from url
+
+[dependencies]
+cliw = { path = "../../cliw" }

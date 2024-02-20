@@ -97,6 +97,9 @@ string = ["clap_builder/string"]  # Allow runtime generated strings
 # In-work features
 unstable-v5 = ["clap_builder/unstable-v5", "clap_derive?/unstable-v5", "deprecated"]
 unstable-styles = ["clap_builder/unstable-styles"]
+unstable-web-alert = ["clap_builder/unstable-web-alert"] # output to a popup alert on web/wasm
+unstable-web-console = ["clap_builder/unstable-web-console"] # output to console log on web/wasm
+unstable-web-urlargs = ["clap_builder/unstable-web-urlargs"] # get args from url on web/wasm
 
 [lib]
 bench = false

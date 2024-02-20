@@ -142,7 +142,7 @@ impl RawArgs {
     /// println!("{paths:?}");
     /// ```
     pub fn from_args() -> Self {
-        Self::new(std::env::args_os())
+        Self::new(cliw::system::args_os())
     }
 
     //// Create an argument list to parse
