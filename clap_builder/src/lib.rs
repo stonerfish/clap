@@ -31,15 +31,6 @@
 #[cfg(not(feature = "std"))]
 compile_error!("`std` feature is currently required to build `clap`");
 
-#[cfg(all(feature = "unstable-web-alert", not(target_arch = "wasm32")))]
-compile_error!("`wasm32-unknown-unknown` target is required to use feature `unstable-web-alert`");
-
-#[cfg(all(feature = "unstable-web-console", not(target_arch = "wasm32")))]
-compile_error!("`wasm32-unknown-unknown` target is required to use feature `unstable-web-console`");
-
-#[cfg(all(feature = "unstable-web-urlargs", not(target_arch = "wasm32")))]
-compile_error!("`wasm32-unknown-unknown` target is required to use feature `unstable-web-urlargs`");
-
 pub use crate::builder::ArgAction;
 pub use crate::builder::Command;
 pub use crate::builder::ValueHint;
