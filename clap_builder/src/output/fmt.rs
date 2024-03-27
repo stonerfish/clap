@@ -53,11 +53,11 @@ impl Colorizer {
 
             match self.stream {
                 Stream::Stderr => {
-                    let mut writer = cliw::system::stderr();
+                    let mut writer = cliw::output::stderr();
                     let _ = writer.write(msg.as_bytes());
                 }
                 Stream::Stdout => {
-                    let mut writer = cliw::system::stdout();
+                    let mut writer = cliw::output::stdout();
                     let _ = writer.write(msg.as_bytes());
                 }
             };
@@ -67,11 +67,11 @@ impl Colorizer {
 
             match self.stream {
                 Stream::Stderr => {
-                    let mut writer = cliw::system::stderr();
+                    let mut writer = cliw::output::stderr();
                     let _ = self.content.write_to(&mut writer);
                 }
                 Stream::Stdout => {
-                    let mut writer = cliw::system::stdout();
+                    let mut writer = cliw::output::stdout();
                     let _ = self.content.write_to(&mut writer);
                 }
             };
@@ -105,11 +105,11 @@ impl Colorizer {
         ))]
         match self.stream {
             Stream::Stdout => {
-                let mut writer = cliw::system::stdout();
+                let mut writer = cliw::output::stdout();
                 self.content.write_to(&mut writer);
             }
             Stream::Stderr => {
-                let mut writer = cliw::system::stderr();
+                let mut writer = cliw::output::stderr();
                 self.content.write_to(&mut writer);
             }
         }

@@ -606,7 +606,7 @@ impl Command {
     /// [`Command::try_get_matches_from_mut`]: Command::try_get_matches_from_mut()
     #[inline]
     pub fn get_matches(self) -> ArgMatches {
-        self.get_matches_from(cliw::system::args_os())
+        self.get_matches_from(cliw::args_os())
     }
 
     /// Parse [`env::args_os`], [exiting][Error::exit] on failure.
@@ -630,7 +630,7 @@ impl Command {
     /// [`env::args_os`]: std::env::args_os()
     /// [`Command::get_matches`]: Command::get_matches()
     pub fn get_matches_mut(&mut self) -> ArgMatches {
-        self.try_get_matches_from_mut(&mut cliw::system::args_os())
+        self.try_get_matches_from_mut(&mut cliw::args_os())
             .unwrap_or_else(|e| e.exit())
     }
 
@@ -666,7 +666,7 @@ impl Command {
     #[inline]
     pub fn try_get_matches(self) -> ClapResult<ArgMatches> {
         // Start the parsing
-        self.try_get_matches_from(cliw::system::args_os())
+        self.try_get_matches_from(cliw::args_os())
     }
 
     /// Parse the specified arguments, [exiting][Error::exit] on failure.
