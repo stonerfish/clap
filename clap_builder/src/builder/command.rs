@@ -446,7 +446,7 @@ impl Command {
     /// ```
     #[must_use]
     pub fn groups(mut self, groups: impl IntoIterator<Item = impl Into<ArgGroup>>) -> Self {
-        for g in groups.into_iter() {
+        for g in groups {
             self = self.group(g.into());
         }
         self
@@ -544,7 +544,7 @@ impl Command {
     /// that exhaustively test your CLI to ensure the asserts are evaluated, this will run those
     /// asserts in a way convenient for running as a test.
     ///
-    /// **Note::** This will not help with asserts in [`ArgMatches`], those will need exhaustive
+    /// **Note:** This will not help with asserts in [`ArgMatches`], those will need exhaustive
     /// testing of your CLI.
     ///
     /// # Examples
@@ -583,7 +583,7 @@ impl Command {
     /// let mut cmd = Command::new("myprog");
     /// let err = cmd.error(ErrorKind::InvalidValue, "Some failure case");
     /// ```
-    pub fn error(&mut self, kind: ErrorKind, message: impl std::fmt::Display) -> Error {
+    pub fn error(&mut self, kind: ErrorKind, message: impl fmt::Display) -> Error {
         Error::raw(kind, message).format(self)
     }
 
@@ -1739,7 +1739,8 @@ impl Command {
 
     /// Sets the program's description for the long help (`--help`).
     ///
-    /// If [`Command::about`] is not specified, this message will be displayed for `-h`.
+    /// If not set, [`Command::about`] will be used for long help in addition to short help
+    /// (`-h`).
     ///
     /// **NOTE:** Only [`Command::about`] (short format) is used in completion
     /// script generation in order to be concise.
@@ -1791,7 +1792,8 @@ impl Command {
     /// This is often used to describe how to use the arguments, caveats to be noted, or license
     /// and contact information.
     ///
-    /// If [`Command::after_help`] is not specified, this message will be displayed for `-h`.
+    /// If not set, [`Command::after_help`] will be used for long help in addition to short help
+    /// (`-h`).
     ///
     /// # Examples
     ///
@@ -1834,7 +1836,8 @@ impl Command {
     ///
     /// This is often used for header, copyright, or license information.
     ///
-    /// If [`Command::before_help`] is not specified, this message will be displayed for `-h`.
+    /// If not set, [`Command::before_help`] will be used for long help in addition to short help
+    /// (`-h`).
     ///
     /// # Examples
     ///
@@ -2216,7 +2219,7 @@ impl Command {
     /// For example, imagine a CLI which has three positional arguments `[foo] [bar] [baz]...` where
     /// `baz` accepts multiple values (similar to man `ARGS...` style training arguments).
     ///
-    /// With this setting the following invocations are posisble:
+    /// With this setting the following invocations are possible:
     ///
     /// * `$ prog foo bar baz1 baz2 baz3`
     /// * `$ prog foo -- baz1 baz2 baz3`
@@ -2566,7 +2569,7 @@ impl Command {
     #[must_use]
     pub fn long_flag_aliases(mut self, names: impl IntoIterator<Item = impl Into<Str>>) -> Self {
         for s in names {
-            self = self.long_flag_alias(s)
+            self = self.long_flag_alias(s);
         }
         self
     }
@@ -3437,6 +3440,13 @@ impl Command {
         &self.name
     }
 
+    /// Get all known names of the cmd (i.e. primary name and visible aliases).
+    pub fn get_name_and_visible_aliases(&self) -> Vec<&str> {
+        let mut names = vec![self.name.as_str()];
+        names.extend(self.get_visible_aliases());
+        names
+    }
+
     /// Get the version of the cmd.
     #[inline]
     pub fn get_version(&self) -> Option<&str> {
@@ -3749,7 +3759,7 @@ impl Command {
     //       Subcommand_1.1.1 (contains Arg)
     //
     fn get_subcommands_containing(&self, arg: &Arg) -> Vec<&Self> {
-        let mut vec = std::vec::Vec::new();
+        let mut vec = Vec::new();
         for idx in 0..self.subcommands.len() {
             if self.subcommands[idx]
                 .args
@@ -4591,7 +4601,7 @@ impl Command {
 
     #[inline]
     pub(crate) fn set(&mut self, s: AppSettings) {
-        self.settings.set(s)
+        self.settings.set(s);
     }
 
     #[inline]
@@ -4655,7 +4665,7 @@ impl Command {
 
     /// Iterate through all the names of all subcommands (not recursively), including aliases.
     /// Used for suggestions.
-    pub(crate) fn all_subcommand_names(&self) -> impl Iterator<Item = &str> + Captures {
+    pub(crate) fn all_subcommand_names(&self) -> impl Iterator<Item = &str> + Captures<'_> {
         self.get_subcommands().flat_map(|sc| {
             let name = sc.get_name();
             let aliases = sc.get_all_aliases();
@@ -4698,7 +4708,7 @@ impl Command {
                 if !args.contains(n) {
                     if self.find(n).is_some() {
                         debug!("Command::unroll_args_in_group:iter: this is an arg");
-                        args.push(n.clone())
+                        args.push(n.clone());
                     } else {
                         debug!("Command::unroll_args_in_group:iter: this is a group");
                         g_vec.push(n);
@@ -4729,7 +4739,7 @@ impl Command {
                 for r in arg.requires.iter().filter_map(&func) {
                     if let Some(req) = self.find(&r) {
                         if !req.requires.is_empty() {
-                            r_vec.push(req.get_id())
+                            r_vec.push(req.get_id());
                         }
                     }
                     args.push(r);
@@ -4879,18 +4889,21 @@ impl From<&'_ Command> for Command {
 }
 
 impl fmt::Display for Command {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.name)
     }
 }
 
+#[allow(dead_code)] // atm dependent on features enabled
 pub(crate) trait AppTag: crate::builder::ext::Extension {}
 
+#[allow(dead_code)] // atm dependent on features enabled
 #[derive(Default, Copy, Clone, Debug)]
 struct TermWidth(usize);
 
 impl AppTag for TermWidth {}
 
+#[allow(dead_code)] // atm dependent on features enabled
 #[derive(Default, Copy, Clone, Debug)]
 struct MaxTermWidth(usize);
 

@@ -1,4 +1,6 @@
 use clap::{arg, error::ErrorKind, Arg, ArgAction, Command};
+use snapbox::assert_data_eq;
+use snapbox::str;
 
 #[test]
 fn only_pos_follow() {
@@ -20,7 +22,7 @@ fn issue_946() {
     let r = Command::new("compiletest")
         .arg(arg!(--exact    "filters match exactly").action(ArgAction::SetTrue))
         .arg(
-            clap::Arg::new("filter")
+            Arg::new("filter")
                 .index(1)
                 .action(ArgAction::Set)
                 .allow_hyphen_values(true)
@@ -211,13 +213,13 @@ fn positional_hyphen_does_not_panic() {
 #[test]
 fn single_positional_usage_string() {
     let mut cmd = Command::new("test").arg(arg!([FILE] "some file"));
-    crate::utils::assert_eq(cmd.render_usage().to_string(), "Usage: test [FILE]");
+    assert_data_eq!(cmd.render_usage().to_string(), str!["Usage: test [FILE]"]);
 }
 
 #[test]
 fn single_positional_multiple_usage_string() {
     let mut cmd = Command::new("test").arg(arg!([FILE]... "some file"));
-    crate::utils::assert_eq(cmd.render_usage().to_string(), "Usage: test [FILE]...");
+    assert_data_eq!(cmd.render_usage().to_string(), str!["Usage: test [FILE]..."]);
 }
 
 #[test]
@@ -225,11 +227,7 @@ fn multiple_positional_usage_string() {
     let mut cmd = Command::new("test")
         .arg(arg!([FILE] "some file"))
         .arg(arg!([FILES]... "some file"));
-    crate::utils::assert_eq(
-        cmd.render_usage().to_string(),
-        "\
-Usage: test [FILE] [FILES]...",
-    );
+    assert_data_eq!(cmd.render_usage().to_string(), str!["Usage: test [FILE] [FILES]..."],);
 }
 
 #[test]
@@ -237,16 +235,13 @@ fn multiple_positional_one_required_usage_string() {
     let mut cmd = Command::new("test")
         .arg(arg!(<FILE> "some file"))
         .arg(arg!([FILES]... "some file"));
-    crate::utils::assert_eq(
-        cmd.render_usage().to_string(),
-        "Usage: test <FILE> [FILES]...",
-    );
+    assert_data_eq!(cmd.render_usage().to_string(), str!["Usage: test <FILE> [FILES]..."]);
 }
 
 #[test]
 fn single_positional_required_usage_string() {
     let mut cmd = Command::new("test").arg(arg!(<FILE> "some file"));
-    crate::utils::assert_eq(cmd.render_usage().to_string(), "Usage: test <FILE>");
+    assert_data_eq!(cmd.render_usage().to_string(), str!["Usage: test <FILE>"]);
 }
 
 // This tests a programmer error and will only succeed with debug_assertions
@@ -334,15 +329,15 @@ fn positional_arg_with_short() {
 
 #[test]
 fn ignore_hyphen_values_on_last() {
-    let cmd = clap::Command::new("foo")
+    let cmd = Command::new("foo")
         .arg(
-            clap::Arg::new("cmd")
+            Arg::new("cmd")
                 .num_args(1..)
                 .last(true)
                 .allow_hyphen_values(true),
         )
         .arg(
-            clap::Arg::new("name")
+            Arg::new("name")
                 .long("name")
                 .short('n')
                 .action(ArgAction::Set)

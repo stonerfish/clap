@@ -1,8 +1,9 @@
 #![allow(dead_code)] // shared with other test modules
 
 use clap::{builder::PossibleValue, Arg, ArgAction, Command, ValueHint};
+use snapbox::prelude::*;
 
-pub fn basic_command(name: &'static str) -> Command {
+pub(crate) fn basic_command(name: &'static str) -> Command {
     Command::new(name)
         .arg(
             Arg::new("config")
@@ -23,7 +24,7 @@ pub fn basic_command(name: &'static str) -> Command {
         )
 }
 
-pub fn feature_sample_command(name: &'static str) -> Command {
+pub(crate) fn feature_sample_command(name: &'static str) -> Command {
     Command::new(name)
         .version("3.0")
         .propagate_version(true)
@@ -53,7 +54,7 @@ pub fn feature_sample_command(name: &'static str) -> Command {
         )
 }
 
-pub fn special_commands_command(name: &'static str) -> Command {
+pub(crate) fn special_commands_command(name: &'static str) -> Command {
     feature_sample_command(name)
         .subcommand(
             Command::new("some_cmd")
@@ -72,7 +73,7 @@ pub fn special_commands_command(name: &'static str) -> Command {
         .subcommand(Command::new("some-hidden-cmd").hide(true))
 }
 
-pub fn quoting_command(name: &'static str) -> Command {
+pub(crate) fn quoting_command(name: &'static str) -> Command {
     Command::new(name)
         .version("3.0")
         .arg(
@@ -121,7 +122,7 @@ pub fn quoting_command(name: &'static str) -> Command {
         ])
 }
 
-pub fn aliases_command(name: &'static str) -> Command {
+pub(crate) fn aliases_command(name: &'static str) -> Command {
     Command::new(name)
         .version("3.0")
         .about("testing nushell completions")
@@ -146,7 +147,7 @@ pub fn aliases_command(name: &'static str) -> Command {
         .arg(Arg::new("positional"))
 }
 
-pub fn sub_subcommands_command(name: &'static str) -> Command {
+pub(crate) fn sub_subcommands_command(name: &'static str) -> Command {
     feature_sample_command(name).subcommand(
         Command::new("some_cmd")
             .about("top level subcommand")
@@ -167,7 +168,7 @@ pub fn sub_subcommands_command(name: &'static str) -> Command {
     )
 }
 
-pub fn value_hint_command(name: &'static str) -> Command {
+pub(crate) fn value_hint_command(name: &'static str) -> Command {
     Command::new(name)
         .arg(
             Arg::new("choice")
@@ -243,25 +244,25 @@ pub fn value_hint_command(name: &'static str) -> Command {
         )
 }
 
-pub fn assert_matches(
-    expected: impl Into<snapbox::Data>,
+pub(crate) fn assert_matches(
+    expected: impl IntoData,
     gen: impl clap_complete::Generator,
-    mut cmd: clap::Command,
+    mut cmd: Command,
     name: &'static str,
 ) {
     let mut buf = vec![];
     clap_complete::generate(gen, &mut cmd, name, &mut buf);
 
     snapbox::Assert::new()
-        .action_env(snapbox::DEFAULT_ACTION_ENV)
+        .action_env(snapbox::assert::DEFAULT_ACTION_ENV)
         .normalize_paths(false)
-        .matches(expected, buf);
+        .eq(buf, expected);
 }
 
-pub fn register_example<R: completest::RuntimeBuilder>(context: &str, name: &str) {
+pub(crate) fn register_example<R: completest::RuntimeBuilder>(context: &str, name: &str) {
     use completest::Runtime as _;
 
-    let scratch = snapbox::path::PathFixture::mutable_temp().unwrap();
+    let scratch = snapbox::dir::DirRoot::mutable_temp().unwrap();
     let scratch_path = scratch.path().unwrap();
 
     let shell_name = R::name();
@@ -306,7 +307,7 @@ pub fn register_example<R: completest::RuntimeBuilder>(context: &str, name: &str
     scratch.close().unwrap();
 }
 
-pub fn load_runtime<R: completest::RuntimeBuilder>(
+pub(crate) fn load_runtime<R: completest::RuntimeBuilder>(
     context: &str,
     name: &str,
 ) -> Box<dyn completest::Runtime>
@@ -319,7 +320,7 @@ where
         .join(context)
         .join(name)
         .join(shell_name);
-    let scratch = snapbox::path::PathFixture::mutable_temp()
+    let scratch = snapbox::dir::DirRoot::mutable_temp()
         .unwrap()
         .with_template(&home)
         .unwrap();
@@ -342,7 +343,7 @@ where
 
 #[derive(Debug)]
 struct ScratchRuntime {
-    _scratch: snapbox::path::PathFixture,
+    _scratch: snapbox::dir::DirRoot,
     runtime: Box<dyn completest::Runtime>,
 }
 
@@ -365,7 +366,7 @@ impl completest::Runtime for ScratchRuntime {
     }
 }
 
-pub fn has_command(command: &str) -> bool {
+pub(crate) fn has_command(command: &str) -> bool {
     let output = match std::process::Command::new(command)
         .arg("--version")
         .output()

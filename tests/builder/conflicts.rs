@@ -77,12 +77,12 @@ fn not_exclusive_with_defaults() {
 #[test]
 fn not_exclusive_with_group() {
     let cmd = Command::new("test")
-        .group(clap::ArgGroup::new("test").arg("foo"))
+        .group(ArgGroup::new("test").arg("foo"))
         .arg(
-            clap::Arg::new("foo")
+            Arg::new("foo")
                 .long("foo")
                 .exclusive(true)
-                .action(clap::ArgAction::SetTrue),
+                .action(ArgAction::SetTrue),
         );
     let result = cmd.try_get_matches_from(vec!["test", "--foo"]);
     assert!(result.is_ok(), "{}", result.unwrap_err());
@@ -137,9 +137,9 @@ fn arg_conflicts_with_group() {
 
 #[test]
 fn arg_conflicts_with_group_with_multiple_sources() {
-    let mut cmd = clap::Command::new("group_conflict")
+    let mut cmd = Command::new("group_conflict")
         .arg(clap::arg!(-f --flag "some flag").conflicts_with("gr"))
-        .group(clap::ArgGroup::new("gr").multiple(true))
+        .group(ArgGroup::new("gr").multiple(true))
         .arg(clap::arg!(--some <name> "some arg").group("gr"))
         .arg(
             clap::arg!(--other <secs> "other arg")
@@ -682,6 +682,126 @@ fn exclusive_with_required() {
         .unwrap();
 
     cmd.clone().try_get_matches_from(["bug", "--test"]).unwrap();
+}
+
+#[test]
+fn exclusive_with_required_unless_present() {
+    let cmd = Command::new("bug")
+        .arg(
+            Arg::new("exclusive")
+                .long("exclusive")
+                .action(ArgAction::SetTrue)
+                .exclusive(true),
+        )
+        .arg(
+            Arg::new("required")
+                .long("required")
+                .action(ArgAction::SetTrue)
+                .required_unless_present("alternative"),
+        )
+        .arg(
+            Arg::new("alternative")
+                .long("alternative")
+                .action(ArgAction::SetTrue),
+        );
+
+    cmd.clone()
+        .try_get_matches_from(["bug", "--required"])
+        .unwrap();
+
+    cmd.clone()
+        .try_get_matches_from(["bug", "--alternative"])
+        .unwrap();
+
+    cmd.clone().try_get_matches_from(["bug"]).unwrap_err();
+
+    cmd.clone()
+        .try_get_matches_from(["bug", "--exclusive", "--required"])
+        .unwrap_err();
+
+    cmd.clone()
+        .try_get_matches_from(["bug", "--exclusive"])
+        .unwrap();
+}
+
+#[test]
+fn exclusive_with_required_unless_present_any() {
+    let cmd = Command::new("bug")
+        .arg(
+            Arg::new("exclusive")
+                .long("exclusive")
+                .action(ArgAction::SetTrue)
+                .exclusive(true),
+        )
+        .arg(
+            Arg::new("required")
+                .long("required")
+                .action(ArgAction::SetTrue)
+                .required_unless_present_any(["alternative"]),
+        )
+        .arg(
+            Arg::new("alternative")
+                .long("alternative")
+                .action(ArgAction::SetTrue),
+        );
+
+    cmd.clone()
+        .try_get_matches_from(["bug", "--required"])
+        .unwrap();
+
+    cmd.clone()
+        .try_get_matches_from(["bug", "--alternative"])
+        .unwrap();
+
+    cmd.clone().try_get_matches_from(["bug"]).unwrap_err();
+
+    cmd.clone()
+        .try_get_matches_from(["bug", "--exclusive", "--required"])
+        .unwrap_err();
+
+    cmd.clone()
+        .try_get_matches_from(["bug", "--exclusive"])
+        .unwrap();
+}
+
+#[test]
+fn exclusive_with_required_unless_present_all() {
+    let cmd = Command::new("bug")
+        .arg(
+            Arg::new("exclusive")
+                .long("exclusive")
+                .action(ArgAction::SetTrue)
+                .exclusive(true),
+        )
+        .arg(
+            Arg::new("required")
+                .long("required")
+                .action(ArgAction::SetTrue)
+                .required_unless_present_all(["alternative"]),
+        )
+        .arg(
+            Arg::new("alternative")
+                .long("alternative")
+                .action(ArgAction::SetTrue),
+        );
+
+    cmd.clone()
+        .try_get_matches_from(["bug", "--required"])
+        .unwrap();
+
+    cmd.clone()
+        .try_get_matches_from(["bug", "--alternative"])
+        .unwrap();
+
+    cmd.clone().try_get_matches_from(["bug"]).unwrap_err();
+
+    cmd.clone()
+        .try_get_matches_from(["bug", "--exclusive", "--required"])
+        .unwrap_err();
+
+    cmd.clone()
+        .try_get_matches_from(["bug", "--exclusive"])
+        .unwrap();
 }
 
 #[test]

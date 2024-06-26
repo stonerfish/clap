@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use clap::*;
+use clap::{builder, Arg, Command, ValueHint};
 
 use crate::generator::{utils, Generator};
 
@@ -36,7 +36,7 @@ fn escape_string(string: &str, escape_comma: bool) -> String {
     }
 }
 
-fn escape_help(help: &clap::builder::StyledStr) -> String {
+fn escape_help(help: &builder::StyledStr) -> String {
     escape_string(&help.to_string().replace('\n', " "), false)
 }
 
@@ -75,7 +75,8 @@ fn gen_fish_inner(
                     .map(|command| format!("__fish_seen_subcommand_from {command}"))
                     .chain(
                         cmd.get_subcommands()
-                            .map(|command| format!("not __fish_seen_subcommand_from {command}"))
+                            .flat_map(Command::get_name_and_visible_aliases)
+                            .map(|name| format!("not __fish_seen_subcommand_from {name}"))
                     )
                     .collect::<Vec<_>>()
                     .join("; and ")
@@ -135,24 +136,28 @@ fn gen_fish_inner(
     }
 
     for subcommand in cmd.get_subcommands() {
-        let mut template = basic_template.clone();
+        for subcommand_name in subcommand.get_name_and_visible_aliases() {
+            let mut template = basic_template.clone();
 
-        template.push_str(" -f");
-        template.push_str(format!(" -a \"{}\"", &subcommand.get_name()).as_str());
+            template.push_str(" -f");
+            template.push_str(format!(" -a \"{}\"", subcommand_name).as_str());
 
-        if let Some(data) = subcommand.get_about() {
-            template.push_str(format!(" -d '{}'", escape_help(data)).as_str())
+            if let Some(data) = subcommand.get_about() {
+                template.push_str(format!(" -d '{}'", escape_help(data)).as_str());
+            }
+
+            buffer.push_str(template.as_str());
+            buffer.push('\n');
         }
-
-        buffer.push_str(template.as_str());
-        buffer.push('\n');
     }
 
     // generate options of subcommands
     for subcommand in cmd.get_subcommands() {
-        let mut parent_commands: Vec<_> = parent_commands.into();
-        parent_commands.push(subcommand.get_name());
-        gen_fish_inner(root_command, &parent_commands, subcommand, buffer);
+        for subcommand_name in subcommand.get_name_and_visible_aliases() {
+            let mut parent_commands: Vec<_> = parent_commands.into();
+            parent_commands.push(subcommand_name);
+            gen_fish_inner(root_command, &parent_commands, subcommand, buffer);
+        }
     }
 }
 
@@ -161,7 +166,7 @@ fn value_completion(option: &Arg) -> String {
         return "".to_string();
     }
 
-    if let Some(data) = crate::generator::utils::possible_values(option) {
+    if let Some(data) = utils::possible_values(option) {
         // We return the possible values with their own empty description e.g. {a\t,b\t}
         // this makes sure that a and b don't get the description of the option or argument
         format!(

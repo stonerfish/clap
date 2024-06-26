@@ -337,7 +337,7 @@ fn write_dynamic_context(
                 let were_provided = singular_or_plural(*actual_num_values as usize);
                 let _ = write!(
                     styled,
-                    "{}{min_values}{} more values required by '{}{invalid_arg}{}'; only {}{actual_num_values}{}{were_provided}",
+                    "{}{min_values}{} values required by '{}{invalid_arg}{}'; only {}{actual_num_values}{}{were_provided}",
                     valid.render(),
                     valid.render_reset(),
                     literal.render(),
@@ -545,7 +545,7 @@ fn did_you_mean(styled: &mut StyledStr, styles: &Styles, context: &str, valid: &
 struct Escape<'s>(&'s str);
 
 impl<'s> std::fmt::Display for Escape<'s> {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if self.0.contains(char::is_whitespace) {
             std::fmt::Debug::fmt(self.0, f)
         } else {

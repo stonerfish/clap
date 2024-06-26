@@ -14,7 +14,7 @@ _my-app() {
     fi
 
     local context curcontext="$curcontext" state line
-    _arguments "${_arguments_options[@]}" \
+    _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
 '::free:' \
@@ -28,19 +28,19 @@ _my-app() {
         curcontext="${curcontext%:*:*}:my-app-command-$line[2]:"
         case $line[2] in
             (foo)
-_arguments "${_arguments_options[@]}" \
+_arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
 && ret=0
 ;;
 (bar)
-_arguments "${_arguments_options[@]}" \
+_arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
 && ret=0
 ;;
 (help)
-_arguments "${_arguments_options[@]}" \
+_arguments "${_arguments_options[@]}" : \
 ":: :_my-app__help_commands" \
 "*::: :->help" \
 && ret=0
@@ -52,15 +52,15 @@ _arguments "${_arguments_options[@]}" \
         curcontext="${curcontext%:*:*}:my-app-help-command-$line[1]:"
         case $line[1] in
             (foo)
-_arguments "${_arguments_options[@]}" \
+_arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (bar)
-_arguments "${_arguments_options[@]}" \
+_arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (help)
-_arguments "${_arguments_options[@]}" \
+_arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
         esac
@@ -86,20 +86,10 @@ _my-app__bar_commands() {
     local commands; commands=()
     _describe -t commands 'my-app bar commands' commands "$@"
 }
-(( $+functions[_my-app__help__bar_commands] )) ||
-_my-app__help__bar_commands() {
-    local commands; commands=()
-    _describe -t commands 'my-app help bar commands' commands "$@"
-}
 (( $+functions[_my-app__foo_commands] )) ||
 _my-app__foo_commands() {
     local commands; commands=()
     _describe -t commands 'my-app foo commands' commands "$@"
-}
-(( $+functions[_my-app__help__foo_commands] )) ||
-_my-app__help__foo_commands() {
-    local commands; commands=()
-    _describe -t commands 'my-app help foo commands' commands "$@"
 }
 (( $+functions[_my-app__help_commands] )) ||
 _my-app__help_commands() {
@@ -109,6 +99,16 @@ _my-app__help_commands() {
 'help:Print this message or the help of the given subcommand(s)' \
     )
     _describe -t commands 'my-app help commands' commands "$@"
+}
+(( $+functions[_my-app__help__bar_commands] )) ||
+_my-app__help__bar_commands() {
+    local commands; commands=()
+    _describe -t commands 'my-app help bar commands' commands "$@"
+}
+(( $+functions[_my-app__help__foo_commands] )) ||
+_my-app__help__foo_commands() {
+    local commands; commands=()
+    _describe -t commands 'my-app help foo commands' commands "$@"
 }
 (( $+functions[_my-app__help__help_commands] )) ||
 _my-app__help__help_commands() {

@@ -1,6 +1,8 @@
 #![cfg(feature = "help")]
 
 use clap::{arg, builder::PossibleValue, error::ErrorKind, Arg, ArgAction, ArgGroup, Command};
+use snapbox::assert_data_eq;
+use snapbox::str;
 
 use super::utils;
 
@@ -79,13 +81,14 @@ fn help_multi_subcommand_error() {
         .try_get_matches_from(["ctest", "help", "subcmd", "multi", "foo"])
         .unwrap_err();
 
-    static EXPECTED: &str = "error: unrecognized subcommand 'foo'
+    assert_data_eq!(err.to_string(), str![[r#"
+error: unrecognized subcommand 'foo'
 
 Usage: ctest subcmd multi [OPTIONS]
 
 For more information, try '--help'.
-";
-    utils::assert_eq(EXPECTED, err.to_string());
+
+"#]]);
 }
 
 #[test]
@@ -2360,7 +2363,7 @@ Options:
   -h, --help     Print help
 ";
 
-    let cmd = clap::Command::new("hello")
+    let cmd = Command::new("hello")
         .bin_name("deno")
         .arg(
             Arg::new("option1")
@@ -2646,7 +2649,7 @@ fn too_many_value_names_panics() {
                 .num_args(1)
                 .value_names(["one", "two"]),
         )
-        .debug_assert()
+        .debug_assert();
 }
 
 #[test]
@@ -2756,10 +2759,10 @@ fn disable_help_flag_affects_help_subcommand() {
 
 #[test]
 fn dont_propagate_version_to_help_subcommand() {
-    let cmd = clap::Command::new("example")
+    let cmd = Command::new("example")
         .version("1.0")
         .propagate_version(true)
-        .subcommand(clap::Command::new("subcommand"));
+        .subcommand(Command::new("subcommand"));
 
     utils::assert_output(
         cmd.clone(),
@@ -2780,7 +2783,7 @@ Arguments:
 
 #[test]
 fn help_without_short() {
-    let mut cmd = clap::Command::new("test")
+    let mut cmd = Command::new("test")
         .arg(arg!(-h --hex <NUM>).required(true))
         .arg(arg!(--help).action(ArgAction::Help))
         .disable_help_flag(true);
@@ -2844,14 +2847,6 @@ Options:
 
 #[test]
 fn parent_cmd_req_in_usage_with_render_help() {
-    static EXPECTED: &str = "\
-some
-
-Usage: parent <TARGET> <ARGS> test
-
-Options:
-  -h, --help  Print help
-";
     let mut cmd = Command::new("parent")
         .version("0.1")
         .arg(Arg::new("TARGET").required(true).help("some"))
@@ -2866,7 +2861,15 @@ Options:
     let subcmd = cmd.find_subcommand_mut("test").unwrap();
 
     let help = subcmd.render_help().to_string();
-    utils::assert_eq(EXPECTED, help);
+    assert_data_eq!(help, str![[r#"
+some
+
+Usage: parent <TARGET> <ARGS> test
+
+Options:
+  -h, --help  Print help
+
+"#]]);
 }
 
 #[test]

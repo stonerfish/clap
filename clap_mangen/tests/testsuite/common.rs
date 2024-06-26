@@ -1,6 +1,7 @@
 use clap::builder::PossibleValue;
+use snapbox::prelude::*;
 
-pub fn basic_command(name: &'static str) -> clap::Command {
+pub(crate) fn basic_command(name: &'static str) -> clap::Command {
     clap::Command::new(name)
         .arg(
             clap::Arg::new("config")
@@ -25,7 +26,7 @@ pub fn basic_command(name: &'static str) -> clap::Command {
         )
 }
 
-pub fn feature_sample_command(name: &'static str) -> clap::Command {
+pub(crate) fn feature_sample_command(name: &'static str) -> clap::Command {
     clap::Command::new(name)
         .version("3.0")
         .propagate_version(true)
@@ -55,7 +56,7 @@ pub fn feature_sample_command(name: &'static str) -> clap::Command {
         )
 }
 
-pub fn special_commands_command(name: &'static str) -> clap::Command {
+pub(crate) fn special_commands_command(name: &'static str) -> clap::Command {
     feature_sample_command(name)
         .subcommand(
             clap::Command::new("some_cmd")
@@ -70,7 +71,7 @@ pub fn special_commands_command(name: &'static str) -> clap::Command {
         .subcommand(clap::Command::new("some-cmd-with-hyphens").alias("hyphen"))
 }
 
-pub fn quoting_command(name: &'static str) -> clap::Command {
+pub(crate) fn quoting_command(name: &'static str) -> clap::Command {
     clap::Command::new(name)
         .version("3.0")
         .arg(
@@ -120,7 +121,7 @@ pub fn quoting_command(name: &'static str) -> clap::Command {
         ])
 }
 
-pub fn aliases_command(name: &'static str) -> clap::Command {
+pub(crate) fn aliases_command(name: &'static str) -> clap::Command {
     clap::Command::new(name)
         .version("3.0")
         .about("testing bash completions")
@@ -145,7 +146,7 @@ pub fn aliases_command(name: &'static str) -> clap::Command {
         .arg(clap::Arg::new("positional"))
 }
 
-pub fn sub_subcommands_command(name: &'static str) -> clap::Command {
+pub(crate) fn sub_subcommands_command(name: &'static str) -> clap::Command {
     feature_sample_command(name).subcommand(
         clap::Command::new("some_cmd")
             .about("top level subcommand")
@@ -154,16 +155,14 @@ pub fn sub_subcommands_command(name: &'static str) -> clap::Command {
                     clap::Arg::new("config")
                         .long("config")
                         .action(clap::ArgAction::Set)
-                        .value_parser([clap::builder::PossibleValue::new(
-                            "Lest quotes aren't escaped.",
-                        )])
+                        .value_parser([PossibleValue::new("Lest quotes aren't escaped.")])
                         .help("the other case to test"),
                 ),
             ),
     )
 }
 
-pub fn value_hint_command(name: &'static str) -> clap::Command {
+pub(crate) fn value_hint_command(name: &'static str) -> clap::Command {
     clap::Command::new(name)
         .arg(
             clap::Arg::new("choice")
@@ -247,7 +246,7 @@ pub fn value_hint_command(name: &'static str) -> clap::Command {
         )
 }
 
-pub fn hidden_option_command(name: &'static str) -> clap::Command {
+pub(crate) fn hidden_option_command(name: &'static str) -> clap::Command {
     clap::Command::new(name)
         .arg(
             clap::Arg::new("config")
@@ -262,7 +261,7 @@ pub fn hidden_option_command(name: &'static str) -> clap::Command {
         )
 }
 
-pub fn env_value_command(name: &'static str) -> clap::Command {
+pub(crate) fn env_value_command(name: &'static str) -> clap::Command {
     clap::Command::new(name).arg(
         clap::Arg::new("config")
             .short('c')
@@ -274,17 +273,17 @@ pub fn env_value_command(name: &'static str) -> clap::Command {
     )
 }
 
-pub fn assert_matches(expected: impl Into<snapbox::Data>, cmd: clap::Command) {
+pub(crate) fn assert_matches(expected: impl IntoData, cmd: clap::Command) {
     let mut buf = vec![];
     clap_mangen::Man::new(cmd).render(&mut buf).unwrap();
 
     snapbox::Assert::new()
-        .action_env(snapbox::DEFAULT_ACTION_ENV)
+        .action_env(snapbox::assert::DEFAULT_ACTION_ENV)
         .normalize_paths(false)
-        .matches(expected, buf);
+        .eq(buf, expected);
 }
 
-pub fn possible_values_command(name: &'static str) -> clap::Command {
+pub(crate) fn possible_values_command(name: &'static str) -> clap::Command {
     clap::Command::new(name)
         .arg(
             clap::Arg::new("choice")
@@ -316,7 +315,7 @@ pub fn possible_values_command(name: &'static str) -> clap::Command {
         )
 }
 
-pub fn value_name_without_arg(name: &'static str) -> clap::Command {
+pub(crate) fn value_name_without_arg(name: &'static str) -> clap::Command {
     clap::Command::new(name).arg(
         clap::Arg::new("flag")
             .long("flag")
