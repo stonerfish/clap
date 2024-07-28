@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [4.5.11] - 2024-07-25
+
+#### Features
+
+- *(dynamic)* Add support for `-fbar` and `-f=bar` completions
+
+## [4.5.10] - 2024-07-25
+
+## [4.5.9] - 2024-07-23
+
+### Features
+
+- *(dynamic)* Support for zsh, elvis, powershell
+- *(dynamic)* Complete `--option val[TAB]`
+- *(dynamic)* Complete subcommand aliases
+- *(dynamic)* Hide hidden flags, subcommands, values, and aliases, only completeing them if no visible variant is available
+
+## [4.5.8] - 2024-07-11
+
+### Fixes
+
+- *(fish)* Nested subcommand completions
+
+## [4.5.7] - 2024-06-28
+
+### Fixes
+
+- *(fish)* Allow completing positionals when subcommands are present
+
+## [4.5.6] - 2024-06-19
+
 ## [4.5.5] - 2024-06-07
 
 ### Fixes
@@ -252,7 +283,13 @@ MSRV changed to 1.64.0
 ## [3.0.1] - 2022-01-03
 
 <!-- next-url -->
-[Unreleased]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.5...HEAD
+[Unreleased]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.11...HEAD
+[4.5.11]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.10...clap_complete-v4.5.11
+[4.5.10]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.9...clap_complete-v4.5.10
+[4.5.9]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.8...clap_complete-v4.5.9
+[4.5.8]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.7...clap_complete-v4.5.8
+[4.5.7]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.6...clap_complete-v4.5.7
+[4.5.6]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.5...clap_complete-v4.5.6
 [4.5.5]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.4...clap_complete-v4.5.5
 [4.5.4]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.3...clap_complete-v4.5.4
 [4.5.3]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.2...clap_complete-v4.5.3

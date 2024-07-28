@@ -36,7 +36,7 @@ jobs:
           rust: "beta"
           features: "full"
         - build: mac
-          os: macos-14
+          os: macos-latest
           rust: "beta"
           features: "full"
         - build: nightly
@@ -65,6 +65,9 @@ jobs:
       with:
         toolchain: ${{ matrix.rust }}
     - uses: Swatinem/rust-cache@v2
+    - name: Install shells
+      if: runner.os == 'Linux'
+      run: sudo apt-get install -y elvish fish zsh
     - name: Build
       run: make build-${{matrix.features}}
     - name: Test
@@ -96,7 +99,10 @@ jobs:
         toolchain: stable
     - uses: Swatinem/rust-cache@v2
     - uses: taiki-e/install-action@cargo-hack
-    - name: Update dependencues
+    - name: Install shells
+      if: runner.os == 'Linux'
+      run: sudo apt-get install -y elvish fish zsh
+    - name: Update dependencies
       run: cargo update
     - name: Build
       run: make build-${{matrix.features}}

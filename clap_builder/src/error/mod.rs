@@ -23,7 +23,7 @@ use crate::output::fmt::Colorizer;
 use crate::output::fmt::Stream;
 use crate::parser::features::suggestions;
 use crate::util::FlatMap;
-use crate::util::{color::ColorChoice, safe_exit, SUCCESS_CODE, USAGE_CODE};
+use crate::util::{color::ColorChoice, SUCCESS_CODE, USAGE_CODE};
 use crate::Command;
 
 #[cfg(feature = "error-context")]
@@ -69,7 +69,7 @@ struct ErrorInner {
     context: FlatMap<ContextKind, ContextValue>,
     message: Option<Message>,
     source: Option<Box<dyn error::Error + Send + Sync>>,
-    help_flag: Option<&'static str>,
+    help_flag: Option<Cow<'static, str>>,
     styles: Styles,
     color_when: ColorChoice,
     color_help_when: ColorChoice,
@@ -233,7 +233,7 @@ impl<F: ErrorFormatter> Error<F> {
     pub fn exit(&self) -> ! {
         // Swallow broken pipe errors
         let _ = self.print();
-        safe_exit(self.exit_code())
+        std::process::exit(self.exit_code());
     }
 
     /// Prints formatted and colored error to `stdout` or `stderr` according to its error kind
@@ -319,7 +319,7 @@ impl<F: ErrorFormatter> Error<F> {
         self
     }
 
-    pub(crate) fn set_help_flag(mut self, help_flag: Option<&'static str>) -> Self {
+    pub(crate) fn set_help_flag(mut self, help_flag: Option<Cow<'static, str>>) -> Self {
         self.inner.help_flag = help_flag;
         self
     }

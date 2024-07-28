@@ -13,8 +13,10 @@ impl crate::dynamic::Completer for Fish {
         completer: &str,
         buf: &mut dyn std::io::Write,
     ) -> Result<(), std::io::Error> {
-        let bin = shlex::quote(bin);
-        let completer = shlex::quote(completer);
+        let bin = shlex::try_quote(bin).unwrap_or(std::borrow::Cow::Borrowed(bin));
+        let completer =
+            shlex::try_quote(completer).unwrap_or(std::borrow::Cow::Borrowed(completer));
+
         writeln!(
             buf,
             r#"complete -x -c {bin} -a "("'{completer}'" complete --shell fish -- (commandline --current-process --tokenize --cut-at-cursor) (commandline --current-token))""#
@@ -30,9 +32,9 @@ impl crate::dynamic::Completer for Fish {
         let index = args.len() - 1;
         let completions = crate::dynamic::complete(cmd, args, index, current_dir)?;
 
-        for (completion, help) in completions {
-            write!(buf, "{}", completion.to_string_lossy())?;
-            if let Some(help) = help {
+        for candidate in completions {
+            write!(buf, "{}", candidate.get_content().to_string_lossy())?;
+            if let Some(help) = candidate.get_help() {
                 write!(
                     buf,
                     "\t{}",
