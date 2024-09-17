@@ -1156,6 +1156,8 @@ impl Command {
 
     /// Sets when to color output.
     ///
+    /// To customize how the output is styled, see [`Command::styles`].
+    ///
     /// **NOTE:** This choice is propagated to all child subcommands.
     ///
     /// **NOTE:** Default behaviour is [`ColorChoice::Auto`].
@@ -1196,13 +1198,13 @@ impl Command {
     /// ```no_run
     /// # use clap_builder as clap;
     /// # use clap::{Command, ColorChoice, builder::styling};
-    /// let styles = styling::Styles::styled()
-    ///     .header(styling::AnsiColor::Green.on_default() | styling::Effects::BOLD)
-    ///     .usage(styling::AnsiColor::Green.on_default() | styling::Effects::BOLD)
-    ///     .literal(styling::AnsiColor::Blue.on_default() | styling::Effects::BOLD)
+    /// const STYLES: styling::Styles = styling::Styles::styled()
+    ///     .header(styling::AnsiColor::Green.on_default().bold())
+    ///     .usage(styling::AnsiColor::Green.on_default().bold())
+    ///     .literal(styling::AnsiColor::Blue.on_default().bold())
     ///     .placeholder(styling::AnsiColor::Cyan.on_default());
     /// Command::new("myprog")
-    ///     .styles(styles)
+    ///     .styles(STYLES)
     ///     .get_matches();
     /// ```
     #[cfg(feature = "color")]
@@ -4558,6 +4560,8 @@ impl Command {
     }
 
     pub(crate) fn format_group(&self, g: &Id) -> StyledStr {
+        use std::fmt::Write as _;
+
         let g_string = self
             .unroll_args_in_group(g)
             .iter()
@@ -4573,10 +4577,9 @@ impl Command {
             })
             .collect::<Vec<_>>()
             .join("|");
+        let placeholder = self.get_styles().get_placeholder();
         let mut styled = StyledStr::new();
-        styled.push_str("<");
-        styled.push_string(g_string);
-        styled.push_str(">");
+        write!(&mut styled, "{placeholder}<{g_string}>{placeholder:#}").unwrap();
         styled
     }
 }

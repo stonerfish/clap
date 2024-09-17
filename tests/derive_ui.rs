@@ -5,8 +5,10 @@
 // <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
 // option. This file may not be copied, modified, or distributed
 
+#![cfg(feature = "unstable-derive-ui-tests")]
+
 #[cfg(feature = "derive")]
-#[rustversion::attr(any(not(stable), before(1.74), since(1.75)), ignore)] // MSRV
+#[rustversion::attr(not(stable(1.80)), ignore)] // STABLE
 #[test]
 fn ui() {
     let t = trybuild::TestCases::new();

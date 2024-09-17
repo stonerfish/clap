@@ -7,6 +7,137 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [4.5.26] - 2024-09-05
+
+### Features
+
+- *(dynamic)* `allow_hyphen_values` support
+
+## [4.5.25] - 2024-09-04
+
+### Compatibility
+
+- *(dynamic)* Removed `CompleteCommand`
+
+### Fixes
+
+- *(dynamic)* Take over ordering of Fish completions
+
+## [4.5.24] - 2024-08-27
+
+### Fixes
+
+- *(dynamic)* Ensure a new enough `shlex` is required
+
+## [4.5.23] - 2024-08-22
+
+### Compatibility
+
+- *(dynamic)* Rename `CompletionCandidate::get_content` to `CompletionCandidate::get_value`
+
+## [4.5.22] - 2024-08-21
+
+### Fixes
+
+- *(dynamic)* Dir completions now include `.`
+
+## [4.5.21] - 2024-08-21
+
+### Features
+
+- *(dynamic)* Add `ArgValueCompleter`, a more flexible `ArgValueCandidates`
+- *(dynamic)* Add `PathCompleter`, a more flexible `ValueHint::*Path`
+
+### Fixes
+
+- *(dynamic)* Sort `ValueHint::*Path` results
+- *(dynamic)* Preserve the users path for `ValueHint::*Path` results
+
+## [4.5.20] - 2024-08-20
+
+### Compatibility
+
+- *(dynamic)* Renamed `CustomCompleter` to `ValueCandidates`
+- *(dynamic)* Renamed `ArgValueCompleter` to `ArgValueCandidates`
+
+## [4.5.19] - 2024-08-19
+
+### Compatibility
+
+- *(dynamic)* Renamed `dynamic` to `engine`
+
+### Fixes
+
+- *(dynamic)* *(bash)* Don't cause a completion to make the program un-runnabe
+- *(dynamic)* *(zsh)* Don't cause a completion to make the program un-runnabe
+
+## [4.5.18] - 2024-08-16
+
+### Features
+
+- *(dynamic)* Complete the last value in a delimited list
+
+## [4.5.17] - 2024-08-16
+
+### Compatibility
+
+- *(dynamic)* Move `command` and `env` out of `dynamic`
+
+### Fixes
+
+- *(dynamic)* Increase `ArgValueCompleter` precedence over `ValueEnum`
+- *(dynamic)* Move `command` and `env` out of `dynamic`
+- Move pre-generated completions to `aot` module
+
+## [4.5.16] - 2024-08-12
+
+## [4.5.15] - 2024-08-12
+
+### Compatibility
+
+- *(dynamic)* Moved `dynamic::shells` to `dynamic::command`
+- *(dynamic)* Guarded `dynamic::command` with `unstable-command` feature
+
+### Features
+
+- *(dynamic)* Added `env::CompleteEnv` application integration
+
+## [4.5.14] - 2024-08-10
+
+### Compatibility
+
+- *(dynamic)* Renamed `CustomCompleter::completions` to `CustomCompleter::candidates`
+- *(dynamic)* Renamed `Completer` to `shells::ShellCompleter`
+
+### Features
+
+- *(dynamic)* Add `shells::CompleteArgs::complete`
+- *(dynamic)* Make `--register` optional
+- *(dynamic)* Make `--shell` optional
+- *(dynamic)* Add powershell support
+
+### Fixes
+
+- *(powershell)* Add missing option hyphens
+- *(dynamic)* Expose `shells::CompleteArgs` and `shells::CompleteCommand` at top-level
+- *(dynamic)* Improve help output
+
+## [4.5.13] - 2024-08-08
+
+### Features
+
+- *(dynamic)* Added `ArgValueCompleter` for custom completions
+
+### Compatibility
+
+- *(dynamic)* `CompletionCandidate::visible` was renamed to `CompletionCandidate::hide`
+
+## [4.5.12] - 2024-07-31
+
+#### Features
+
+- *(dynamic)* Support completing with `num_args`
+
 ## [4.5.11] - 2024-07-25
 
 #### Features
@@ -283,7 +414,22 @@ MSRV changed to 1.64.0
 ## [3.0.1] - 2022-01-03
 
 <!-- next-url -->
-[Unreleased]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.11...HEAD
+[Unreleased]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.26...HEAD
+[4.5.26]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.25...clap_complete-v4.5.26
+[4.5.25]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.24...clap_complete-v4.5.25
+[4.5.24]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.23...clap_complete-v4.5.24
+[4.5.23]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.22...clap_complete-v4.5.23
+[4.5.22]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.21...clap_complete-v4.5.22
+[4.5.21]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.20...clap_complete-v4.5.21
+[4.5.20]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.19...clap_complete-v4.5.20
+[4.5.19]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.18...clap_complete-v4.5.19
+[4.5.18]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.17...clap_complete-v4.5.18
+[4.5.17]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.16...clap_complete-v4.5.17
+[4.5.16]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.15...clap_complete-v4.5.16
+[4.5.15]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.14...clap_complete-v4.5.15
+[4.5.14]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.13...clap_complete-v4.5.14
+[4.5.13]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.12...clap_complete-v4.5.13
+[4.5.12]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.11...clap_complete-v4.5.12
 [4.5.11]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.10...clap_complete-v4.5.11
 [4.5.10]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.9...clap_complete-v4.5.10
 [4.5.9]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.8...clap_complete-v4.5.9

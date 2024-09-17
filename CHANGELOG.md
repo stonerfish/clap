@@ -20,6 +20,44 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [4.5.17] - 2024-09-04
+
+### Fixes
+
+- *(help)* Style required argument groups
+- *(derive)* Improve error messages when unsupported fields are used
+
+## [4.5.16] - 2024-08-15
+
+### Fixes
+
+- *(derive)* Improve error messages when `derive` feature is missing
+
+## [4.5.15] - 2024-08-10
+
+### Compatiblity
+
+- *(unstable-ext)* `Arg::remove` changed return types
+
+### Fixes
+
+- *(unstable-ext)* Make `Arg::remove` return the removed item
+
+## [4.5.14] - 2024-08-08
+
+### Features
+
+- *(unstable-ext)* Added `Arg::add` for attaching arbitrary state, like completion hints, to `Arg` without `Arg` knowing about it
+
+## [4.5.13] - 2024-07-31
+
+### Fixes
+
+- *(derive)* Improve error message when `#[flatten]`ing an optional `#[group(skip)]`
+- *(help)* Properly wrap long subcommand descriptions in help
+
+## [4.5.12] - 2024-07-31
+
 ## [4.5.11] - 2024-07-25
 
 ## [4.5.10] - 2024-07-23
@@ -4597,7 +4635,13 @@ Minimum version of Rust is now v1.13.0 (Stable)
 * **arg**  allow lifetimes other than 'static in arguments ([9e8c1fb9](https://github.com/clap-rs/clap/commit/9e8c1fb9406f8448873ca58bab07fe905f1551e5))
 
 <!-- next-url -->
-[Unreleased]: https://github.com/clap-rs/clap/compare/v4.5.11...HEAD
+[Unreleased]: https://github.com/clap-rs/clap/compare/v4.5.17...HEAD
+[4.5.17]: https://github.com/clap-rs/clap/compare/v4.5.16...v4.5.17
+[4.5.16]: https://github.com/clap-rs/clap/compare/v4.5.15...v4.5.16
+[4.5.15]: https://github.com/clap-rs/clap/compare/v4.5.14...v4.5.15
+[4.5.14]: https://github.com/clap-rs/clap/compare/v4.5.13...v4.5.14
+[4.5.13]: https://github.com/clap-rs/clap/compare/v4.5.12...v4.5.13
+[4.5.12]: https://github.com/clap-rs/clap/compare/v4.5.11...v4.5.12
 [4.5.11]: https://github.com/clap-rs/clap/compare/v4.5.10...v4.5.11
 [4.5.10]: https://github.com/clap-rs/clap/compare/v4.5.9...v4.5.10
 [4.5.9]: https://github.com/clap-rs/clap/compare/v4.5.8...v4.5.9

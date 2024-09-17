@@ -11,6 +11,9 @@ use std::{
 
 // Internal
 use super::{ArgFlags, ArgSettings};
+#[cfg(feature = "unstable-ext")]
+use crate::builder::ext::Extension;
+use crate::builder::ext::Extensions;
 use crate::builder::ArgPredicate;
 use crate::builder::IntoResettable;
 use crate::builder::OsStr;
@@ -85,7 +88,7 @@ pub struct Arg {
     pub(crate) terminator: Option<Str>,
     pub(crate) index: Option<usize>,
     pub(crate) help_heading: Option<Option<Str>>,
-    pub(crate) value_hint: Option<ValueHint>,
+    pub(crate) ext: Extensions,
 }
 
 /// # Basic API
@@ -869,6 +872,14 @@ impl Arg {
         self.settings.unset(setting);
         self
     }
+
+    /// Extend [`Arg`] with [`ArgExt`] data
+    #[cfg(feature = "unstable-ext")]
+    #[allow(clippy::should_implement_trait)]
+    pub fn add<T: ArgExt + Extension>(mut self, tagged: T) -> Self {
+        self.ext.set(tagged);
+        self
+    }
 }
 
 /// # Value Handling
@@ -1291,7 +1302,15 @@ impl Arg {
     /// ```
     #[must_use]
     pub fn value_hint(mut self, value_hint: impl IntoResettable<ValueHint>) -> Self {
-        self.value_hint = value_hint.into_resettable().into_option();
+        // HACK: we should use `Self::add` and `Self::remove` to type-check that `ArgExt` is used
+        match value_hint.into_resettable().into_option() {
+            Some(value_hint) => {
+                self.ext.set(value_hint);
+            }
+            None => {
+                self.ext.remove::<ValueHint>();
+            }
+        }
         self
     }
 
@@ -1519,11 +1538,8 @@ impl Arg {
 
     /// Allow grouping of multiple values via a delimiter.
     ///
-    /// i.e. should `--option=val1,val2,val3` be parsed as three values (`val1`, `val2`,
-    /// and `val3`) or as a single value (`val1,val2,val3`). Defaults to using `,` (comma) as the
-    /// value delimiter for all arguments that accept values (options and positional arguments)
-    ///
-    /// **NOTE:** implicitly sets [`Arg::action(ArgAction::Set)`]
+    /// i.e. allow values (`val1,val2,val3`) to be parsed as three values (`val1`, `val2`,
+    /// and `val3`) instead of one value (`val1,val2,val3`).
     ///
     /// # Examples
     ///
@@ -4022,7 +4038,8 @@ impl Arg {
 
     /// Get the value hint of this argument
     pub fn get_value_hint(&self) -> ValueHint {
-        self.value_hint.unwrap_or_else(|| {
+        // HACK: we should use `Self::add` and `Self::remove` to type-check that `ArgExt` is used
+        self.ext.get::<ValueHint>().copied().unwrap_or_else(|| {
             if self.is_takes_value_set() {
                 let type_id = self.get_value_parser().type_id();
                 if type_id == AnyValueId::of::<std::path::PathBuf>() {
@@ -4210,6 +4227,18 @@ impl Arg {
     pub fn is_ignore_case_set(&self) -> bool {
         self.is_set(ArgSettings::IgnoreCase)
     }
+
+    /// Access an [`ArgExt`]
+    #[cfg(feature = "unstable-ext")]
+    pub fn get<T: ArgExt + Extension>(&self) -> Option<&T> {
+        self.ext.get::<T>()
+    }
+
+    /// Remove an [`ArgExt`]
+    #[cfg(feature = "unstable-ext")]
+    pub fn remove<T: ArgExt + Extension>(mut self) -> Option<T> {
+        self.ext.remove::<T>()
+    }
 }
 
 /// # Internally used only
@@ -4300,14 +4329,9 @@ impl Arg {
         let mut styled = StyledStr::new();
         // Write the name such --long or -l
         if let Some(l) = self.get_long() {
-            let _ = write!(
-                styled,
-                "{}--{l}{}",
-                literal.render(),
-                literal.render_reset()
-            );
+            let _ = write!(styled, "{literal}--{l}{literal:#}",);
         } else if let Some(s) = self.get_short() {
-            let _ = write!(styled, "{}-{s}{}", literal.render(), literal.render_reset());
+            let _ = write!(styled, "{literal}-{s}{literal:#}");
         }
         styled.push_styled(&self.stylize_arg_suffix(styles, required));
         styled
@@ -4335,32 +4359,17 @@ impl Arg {
             } else {
                 (placeholder, " ")
             };
-            let _ = write!(styled, "{}{start}{}", style.render(), style.render_reset());
+            let _ = write!(styled, "{style}{start}{style:#}");
         }
         if self.is_takes_value_set() || self.is_positional() {
             let required = required.unwrap_or_else(|| self.is_required_set());
             let arg_val = self.render_arg_val(required);
-            let _ = write!(
-                styled,
-                "{}{arg_val}{}",
-                placeholder.render(),
-                placeholder.render_reset()
-            );
+            let _ = write!(styled, "{placeholder}{arg_val}{placeholder:#}",);
         } else if matches!(*self.get_action(), ArgAction::Count) {
-            let _ = write!(
-                styled,
-                "{}...{}",
-                placeholder.render(),
-                placeholder.render_reset()
-            );
+            let _ = write!(styled, "{placeholder}...{placeholder:#}",);
         }
         if need_closing_bracket {
-            let _ = write!(
-                styled,
-                "{}]{}",
-                placeholder.render(),
-                placeholder.render_reset()
-            );
+            let _ = write!(styled, "{placeholder}]{placeholder:#}",);
         }
 
         styled
@@ -4484,8 +4493,8 @@ impl fmt::Debug for Arg {
             .field("terminator", &self.terminator)
             .field("index", &self.index)
             .field("help_heading", &self.help_heading)
-            .field("value_hint", &self.value_hint)
-            .field("default_missing_vals", &self.default_missing_vals);
+            .field("default_missing_vals", &self.default_missing_vals)
+            .field("ext", &self.ext);
 
         #[cfg(feature = "env")]
         {
@@ -4495,6 +4504,10 @@ impl fmt::Debug for Arg {
         ds.finish()
     }
 }
+
+/// User-provided data that can be attached to an [`Arg`]
+#[cfg(feature = "unstable-ext")]
+pub trait ArgExt: Extension {}
 
 // Flags
 #[cfg(test)]

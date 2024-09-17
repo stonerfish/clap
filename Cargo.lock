@@ -101,9 +101,9 @@ dependencies = [
 
 [[package]]
 name = "anstyle"
-version = "1.0.7"
+version = "1.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "038dfcf04a5feb68e9c60b21c9625a54c2c0616e79b72b0fd87075a056ae1d1b"
+checksum = "1bec1de6f59aedf83baf9ff929c98f2ad654b97c9510f4e70cf6f661d49fd5b1"
 
 [[package]]
 name = "anstyle-parse"
@@ -410,10 +410,11 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.5.11"
+version = "4.5.17"
 dependencies = [
  "automod",
- "clap_builder 4.5.11",
+ "clap-cargo",
+ "clap_builder 4.5.17",
  "clap_derive",
  "humantime",
  "rustversion",
@@ -424,10 +425,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "clap-cargo"
+version = "0.14.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23b2ea69cefa96b848b73ad516ad1d59a195cdf9263087d977f648a818c8b43e"
+dependencies = [
+ "anstyle",
+]
+
+[[package]]
 name = "clap_bench"
 version = "0.0.0"
 dependencies = [
- "clap 4.5.11",
+ "clap 4.5.17",
  "divan",
  "lazy_static",
 ]
@@ -447,7 +457,7 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.5.11"
+version = "4.5.17"
 dependencies = [
  "anstream",
  "anstyle",
@@ -465,26 +475,24 @@ dependencies = [
 
 [[package]]
 name = "clap_complete"
-version = "4.5.11"
+version = "4.5.26"
 dependencies = [
  "automod",
- "clap 4.5.11",
+ "clap 4.5.17",
  "clap_lex 0.7.2",
  "completest",
  "completest-pty",
  "is_executable",
- "pathdiff",
  "shlex",
  "snapbox",
  "trycmd",
- "unicode-xid",
 ]
 
 [[package]]
 name = "clap_complete_fig"
 version = "4.5.2"
 dependencies = [
- "clap 4.5.11",
+ "clap 4.5.17",
  "clap_complete",
  "snapbox",
 ]
@@ -493,7 +501,7 @@ dependencies = [
 name = "clap_complete_nushell"
 version = "4.5.3"
 dependencies = [
- "clap 4.5.11",
+ "clap 4.5.17",
  "clap_complete",
  "completest",
  "completest-nu",
@@ -502,7 +510,7 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "4.5.11"
+version = "4.5.13"
 dependencies = [
  "heck 0.5.0",
  "proc-macro2",
@@ -529,7 +537,7 @@ name = "clap_mangen"
 version = "0.2.23"
 dependencies = [
  "automod",
- "clap 4.5.11",
+ "clap 4.5.17",
  "roff",
  "snapbox",
 ]
@@ -581,15 +589,15 @@ checksum = "0b6a852b24ab71dffc585bcb46eaf7959d175cb865a7152e35b348d1b2960422"
 
 [[package]]
 name = "completest"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6cda99a94266124c2cce3d239973ef8ce3160c83a3f426a314285d9bf6422d1"
+checksum = "410de1ffe61368aa040f599747584e9e3d19235cf4045be6159edb167ef45ddb"
 
 [[package]]
 name = "completest-nu"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3006deac8ed40135bcdb5da3d190f7da17a5b897e0da6ea17179059aec6db60"
+checksum = "ffcc1bf2b48cda5a61ca565fa1f01344de38280e7acea8bcd3b48b5451c06c23"
 dependencies = [
  "completest",
  "dunce",
@@ -604,9 +612,9 @@ dependencies = [
 
 [[package]]
 name = "completest-pty"
-version = "0.5.2"
+version = "0.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee700748da7d34de4bbe0296d3153e8ef5217233d814d23fb68106c110dd9bc5"
+checksum = "fbd2f22a999db122bd2861c504aa363bbacaa32ebea29edf6924ee6cfe044313"
 dependencies = [
  "completest",
  "ptyprocess",
@@ -2982,9 +2990,9 @@ checksum = "b7c388c1b5e93756d0c740965c41e8822f866621d41acbdf6336a6a168f8840c"
 
 [[package]]
 name = "snapbox"
-version = "0.6.11"
+version = "0.6.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "699c824ef8c2061c39efb3af4f334310b3acbfb2a50c6d1f867e4d95dcff94be"
+checksum = "027c936207f85d10d015e21faf5c676c7e08c453ed371adf55c0874c443ca77a"
 dependencies = [
  "anstream",
  "anstyle",
@@ -3005,9 +3013,9 @@ dependencies = [
 
 [[package]]
 name = "snapbox-macros"
-version = "0.3.9"
+version = "0.3.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1f4c14672714436c09254801c934b203196a51182a5107fb76591c7cc56424d"
+checksum = "16569f53ca23a41bb6f62e0a5084aa1661f4814a67fa33696a79073e03a664af"
 dependencies = [
  "anstream",
 ]
@@ -3304,9 +3312,9 @@ dependencies = [
 
 [[package]]
 name = "trybuild"
-version = "1.0.97"
+version = "1.0.99"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b1e5645f2ee8025c2f1d75e1138f2dd034d74e6ba54620f3c569ba2a2a1ea06"
+checksum = "207aa50d36c4be8d8c6ea829478be44a372c6a77669937bb39c698e52f1491e8"
 dependencies = [
  "glob",
  "serde",
@@ -3318,9 +3326,9 @@ dependencies = [
 
 [[package]]
 name = "trycmd"
-version = "0.15.4"
+version = "0.15.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59709bd8eccada6a3fded26d22a7f2dcee406c18d3bd7ad2605ca3eeb8f6f6ec"
+checksum = "3e8673f1dc45acdff8e25a06cc62f8e529563e8acd84237ce83d5a28e2befa12"
 dependencies = [
  "automod",
  "glob",

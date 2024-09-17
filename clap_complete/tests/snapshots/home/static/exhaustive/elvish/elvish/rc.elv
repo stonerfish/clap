@@ -33,7 +33,6 @@ set edit:completion:arg-completer[exhaustive] = {|@words|
             cand last 'last'
             cand alias 'alias'
             cand hint 'hint'
-            cand complete 'Register shell completions for this program'
             cand help 'Print this message or the help of the given subcommand(s)'
         }
         &'exhaustive;action'= {
@@ -238,15 +237,6 @@ set edit:completion:arg-completer[exhaustive] = {|@words|
             cand -V 'Print version'
             cand --version 'Print version'
         }
-        &'exhaustive;complete'= {
-            cand --shell 'Specify shell to complete for'
-            cand --register 'Path to write completion-registration to'
-            cand --global 'everywhere'
-            cand -h 'Print help (see more with ''--help'')'
-            cand --help 'Print help (see more with ''--help'')'
-            cand -V 'Print version'
-            cand --version 'Print version'
-        }
         &'exhaustive;help'= {
             cand action 'action'
             cand quote 'quote'
@@ -255,7 +245,6 @@ set edit:completion:arg-completer[exhaustive] = {|@words|
             cand last 'last'
             cand alias 'alias'
             cand hint 'hint'
-            cand complete 'Register shell completions for this program'
             cand help 'Print this message or the help of the given subcommand(s)'
         }
         &'exhaustive;help;action'= {
@@ -298,8 +287,6 @@ set edit:completion:arg-completer[exhaustive] = {|@words|
         &'exhaustive;help;alias'= {
         }
         &'exhaustive;help;hint'= {
-        }
-        &'exhaustive;help;complete'= {
         }
         &'exhaustive;help;help'= {
         }
