@@ -1,9 +1,12 @@
 use crate::common;
+#[allow(unused_imports)]
 use snapbox::assert_data_eq;
 
 #[cfg(unix)]
+#[cfg(feature = "unstable-shell-tests")]
 const CMD: &str = "elvish";
 #[cfg(unix)]
+#[cfg(feature = "unstable-shell-tests")]
 type RuntimeBuilder = completest_pty::ElvishRuntimeBuilder;
 
 #[test]
@@ -141,12 +144,14 @@ fn subcommand_last() {
 
 #[test]
 #[cfg(unix)]
+#[cfg(feature = "unstable-shell-tests")]
 fn register_completion() {
     common::register_example::<RuntimeBuilder>("static", "exhaustive");
 }
 
 #[test]
 #[cfg(unix)]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete_static_toplevel() {
     if !common::has_command(CMD) {
         return;
@@ -180,12 +185,14 @@ value          value
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn register_dynamic_env() {
     common::register_example::<RuntimeBuilder>("dynamic-env", "exhaustive");
 }
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete_dynamic_env_toplevel() {
     if !common::has_command(CMD) {
         return;
@@ -198,8 +205,8 @@ fn complete_dynamic_env_toplevel() {
     let expected = snapbox::str![[r#"
 % exhaustive --generate
  COMPLETING argument  
---generate  --help     -V  action  help  last    quote
---global    --version  -h  alias   hint  pacman  value
+--generate  --help     action  help  last    quote
+--global    --version  alias   hint  pacman  value
 "#]];
     let actual = runtime.complete(input, &term).unwrap();
     assert_data_eq!(actual, expected);
@@ -207,6 +214,7 @@ fn complete_dynamic_env_toplevel() {
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete_dynamic_env_quoted_help() {
     if !common::has_command(CMD) {
         return;
@@ -219,10 +227,9 @@ fn complete_dynamic_env_quoted_help() {
     let expected = snapbox::str![[r#"
 % exhaustive quote --backslash
  COMPLETING argument  
---backslash  --double-quotes  --single-quotes  cmd-backslash      cmd-expansions   
---backticks  --expansions     --version        cmd-backticks      cmd-single-quotes
---brackets   --global         -V               cmd-brackets       escape-help      
---choice     --help           -h               cmd-double-quotes  help             
+--backslash  --choice         --global         --version      cmd-brackets       cmd-single-quotes
+--backticks  --double-quotes  --help           cmd-backslash  cmd-double-quotes  escape-help      
+--brackets   --expansions     --single-quotes  cmd-backticks  cmd-expansions     help             
 "#]];
     let actual = runtime.complete(input, &term).unwrap();
     assert_data_eq!(actual, expected);
@@ -230,6 +237,7 @@ fn complete_dynamic_env_quoted_help() {
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete_dynamic_env_option_value() {
     if !common::has_command(CMD) {
         return;
@@ -259,6 +267,7 @@ fn complete_dynamic_env_option_value() {
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete_dynamic_env_quoted_value() {
     if !common::has_command(CMD) {
         return;

@@ -3,73 +3,10 @@ use std::ffi::OsStr;
 use std::sync::Arc;
 
 use clap::builder::ArgExt;
+use clap::builder::CommandExt;
 use clap_lex::OsStrExt as _;
 
 use super::CompletionCandidate;
-
-/// Extend [`Arg`][clap::Arg] with a [`ValueCandidates`]
-///
-/// # Example
-///
-/// ```rust
-/// use clap::Parser;
-/// use clap_complete::engine::{ArgValueCandidates, CompletionCandidate};
-///
-/// #[derive(Debug, Parser)]
-/// struct Cli {
-///     #[arg(long, add = ArgValueCandidates::new(|| { vec![
-///         CompletionCandidate::new("foo"),
-///         CompletionCandidate::new("bar"),
-///         CompletionCandidate::new("baz")] }))]
-///     custom: Option<String>,
-/// }
-/// ```
-#[derive(Clone)]
-pub struct ArgValueCandidates(Arc<dyn ValueCandidates>);
-
-impl ArgValueCandidates {
-    /// Create a new `ArgValueCandidates` with a custom completer
-    pub fn new<C>(completer: C) -> Self
-    where
-        C: ValueCandidates + 'static,
-    {
-        Self(Arc::new(completer))
-    }
-
-    /// All potential candidates for an argument.
-    ///
-    /// See [`CompletionCandidate`] for more information.
-    pub fn candidates(&self) -> Vec<CompletionCandidate> {
-        self.0.candidates()
-    }
-}
-
-impl std::fmt::Debug for ArgValueCandidates {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(type_name::<Self>())
-    }
-}
-
-impl ArgExt for ArgValueCandidates {}
-
-/// User-provided completion candidates for an [`Arg`][clap::Arg], see [`ArgValueCandidates`]
-///
-/// This is useful when predefined value hints are not enough.
-pub trait ValueCandidates: Send + Sync {
-    /// All potential candidates for an argument.
-    ///
-    /// See [`CompletionCandidate`] for more information.
-    fn candidates(&self) -> Vec<CompletionCandidate>;
-}
-
-impl<F> ValueCandidates for F
-where
-    F: Fn() -> Vec<CompletionCandidate> + Send + Sync,
-{
-    fn candidates(&self) -> Vec<CompletionCandidate> {
-        self()
-    }
-}
 
 /// Extend [`Arg`][clap::Arg] with a completer
 ///
@@ -150,6 +87,116 @@ where
     }
 }
 
+/// Extend [`Arg`][clap::Arg] with a [`ValueCandidates`]
+///
+/// # Example
+///
+/// ```rust
+/// use clap::Parser;
+/// use clap_complete::engine::{ArgValueCandidates, CompletionCandidate};
+///
+/// #[derive(Debug, Parser)]
+/// struct Cli {
+///     #[arg(long, add = ArgValueCandidates::new(|| { vec![
+///         CompletionCandidate::new("foo"),
+///         CompletionCandidate::new("bar"),
+///         CompletionCandidate::new("baz")] }))]
+///     custom: Option<String>,
+/// }
+/// ```
+#[derive(Clone)]
+pub struct ArgValueCandidates(Arc<dyn ValueCandidates>);
+
+impl ArgValueCandidates {
+    /// Create a new `ArgValueCandidates` with a custom completer
+    pub fn new<C>(completer: C) -> Self
+    where
+        C: ValueCandidates + 'static,
+    {
+        Self(Arc::new(completer))
+    }
+
+    /// All potential candidates for an argument.
+    ///
+    /// See [`CompletionCandidate`] for more information.
+    pub fn candidates(&self) -> Vec<CompletionCandidate> {
+        self.0.candidates()
+    }
+}
+
+impl std::fmt::Debug for ArgValueCandidates {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(type_name::<Self>())
+    }
+}
+
+impl ArgExt for ArgValueCandidates {}
+
+/// Extend [`Command`][clap::Command] with a [`ValueCandidates`]
+///
+/// # Example
+/// ```rust
+/// use clap::Parser;
+/// use clap_complete::engine::{SubcommandCandidates, CompletionCandidate};
+/// #[derive(Debug, Parser)]
+/// #[clap(name = "cli", add = SubcommandCandidates::new(|| { vec![
+///     CompletionCandidate::new("foo"),
+///     CompletionCandidate::new("bar"),
+///     CompletionCandidate::new("baz")] }))]
+/// struct Cli {
+///     #[arg(long)]
+///     input: Option<String>,
+/// }
+/// ```
+#[derive(Clone)]
+pub struct SubcommandCandidates(Arc<dyn ValueCandidates>);
+
+impl SubcommandCandidates {
+    /// Create a new `SubcommandCandidates` with a custom completer
+    pub fn new<C>(completer: C) -> Self
+    where
+        C: ValueCandidates + 'static,
+    {
+        Self(Arc::new(completer))
+    }
+
+    /// All potential candidates for an external subcommand.
+    ///
+    /// See [`CompletionCandidate`] for more information.
+    pub fn candidates(&self) -> Vec<CompletionCandidate> {
+        self.0.candidates()
+    }
+}
+
+impl std::fmt::Debug for SubcommandCandidates {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(type_name::<Self>())
+    }
+}
+
+impl CommandExt for SubcommandCandidates {}
+
+/// User-provided completion candidates for an [`Arg`][clap::Arg], see [`ArgValueCandidates`]
+///
+/// User-provided completion candidates for an [`Subcommand`][clap::Subcommand], see [`SubcommandCandidates`]
+///
+/// This is useful when predefined value hints are not enough.
+pub trait ValueCandidates: Send + Sync {
+    /// All potential candidates for an argument.
+    ///
+    /// See [`CompletionCandidate`] for more information.
+    fn candidates(&self) -> Vec<CompletionCandidate>;
+}
+
+impl<F> ValueCandidates for F
+where
+    F: Fn() -> Vec<CompletionCandidate> + Send + Sync,
+{
+    fn candidates(&self) -> Vec<CompletionCandidate> {
+        self()
+    }
+}
+
 /// Complete a value as a [`std::path::Path`]
 ///
 /// # Example
@@ -166,6 +213,7 @@ where
 /// ```
 pub struct PathCompleter {
     current_dir: Option<std::path::PathBuf>,
+    #[allow(clippy::type_complexity)]
     filter: Option<Box<dyn Fn(&std::path::Path) -> bool + Send + Sync>>,
     stdio: bool,
 }

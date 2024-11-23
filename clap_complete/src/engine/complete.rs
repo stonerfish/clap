@@ -7,6 +7,7 @@ use super::custom::complete_path;
 use super::ArgValueCandidates;
 use super::ArgValueCompleter;
 use super::CompletionCandidate;
+use super::SubcommandCandidates;
 
 /// Complete the given command, shell-agnostic
 pub fn complete(
@@ -15,6 +16,7 @@ pub fn complete(
     arg_index: usize,
     current_dir: Option<&std::path::Path>,
 ) -> Result<Vec<CompletionCandidate>, std::io::Error> {
+    debug!("complete: args={args:?}, arg_index={arg_index:?}, current_dir={current_dir:?}");
     cmd.build();
 
     let raw_args = clap_lex::RawArgs::new(args);
@@ -26,6 +28,7 @@ pub fn complete(
     );
     // As we loop, `cursor` will always be pointing to the next item
     raw_args.next_os(&mut target_cursor);
+    debug!("complete: target_cursor={target_cursor:?}");
 
     // TODO: Multicall support
     if !cmd.is_no_binary_name_set() {
@@ -39,11 +42,13 @@ pub fn complete(
     while let Some(arg) = raw_args.next(&mut cursor) {
         let current_state = next_state;
         next_state = ParseState::ValueDone;
+        debug!(
+            "complete::next: arg={:?}, current_state={current_state:?}, cursor={cursor:?}",
+            arg.to_value_os(),
+        );
         if cursor == target_cursor {
             return complete_arg(&arg, current_cmd, current_dir, pos_index, current_state);
         }
-
-        debug!("complete::next: Begin parsing '{:?}'", arg.to_value_os(),);
 
         if let Ok(value) = arg.to_value() {
             if let Some(next_cmd) = current_cmd.find_subcommand(value) {
@@ -142,7 +147,51 @@ fn complete_arg(
 
     match state {
         ParseState::ValueDone => {
-            if let Some((flag, value)) = arg.to_long() {
+            if let Ok(value) = arg.to_value() {
+                completions.extend(complete_subcommand(value, cmd));
+            }
+
+            if let Some(positional) = cmd
+                .get_positionals()
+                .find(|p| p.get_index() == Some(pos_index))
+            {
+                completions.extend(complete_arg_value(arg.to_value(), positional, current_dir));
+            }
+
+            if arg.is_empty() {
+                completions.extend(longs_and_visible_aliases(cmd));
+                completions.extend(hidden_longs_aliases(cmd));
+
+                let dash_or_arg = if arg.is_empty() {
+                    "-".into()
+                } else {
+                    arg.to_value_os().to_string_lossy()
+                };
+                completions.extend(
+                    shorts_and_visible_aliases(cmd)
+                        .into_iter()
+                        .map(|comp| comp.add_prefix(dash_or_arg.to_string())),
+                );
+            } else if arg.is_stdio() {
+                // HACK: Assuming knowledge of is_stdio
+                let dash_or_arg = if arg.is_empty() {
+                    "-".into()
+                } else {
+                    arg.to_value_os().to_string_lossy()
+                };
+                completions.extend(
+                    shorts_and_visible_aliases(cmd)
+                        .into_iter()
+                        .map(|comp| comp.add_prefix(dash_or_arg.to_string())),
+                );
+
+                completions.extend(longs_and_visible_aliases(cmd));
+                completions.extend(hidden_longs_aliases(cmd));
+            } else if arg.is_escape() {
+                // HACK: Assuming knowledge of is_escape
+                completions.extend(longs_and_visible_aliases(cmd));
+                completions.extend(hidden_longs_aliases(cmd));
+            } else if let Some((flag, value)) = arg.to_long() {
                 if let Ok(flag) = flag {
                     if let Some(value) = value {
                         if let Some(arg) = cmd.get_arguments().find(|a| a.get_long() == Some(flag))
@@ -150,38 +199,18 @@ fn complete_arg(
                             completions.extend(
                                 complete_arg_value(value.to_str().ok_or(value), arg, current_dir)
                                     .into_iter()
-                                    .map(|comp| comp.add_prefix(format!("--{}=", flag))),
+                                    .map(|comp| comp.add_prefix(format!("--{flag}="))),
                             );
                         }
                     } else {
                         completions.extend(longs_and_visible_aliases(cmd).into_iter().filter(
-                            |comp| comp.get_value().starts_with(format!("--{}", flag).as_str()),
+                            |comp| comp.get_value().starts_with(format!("--{flag}").as_str()),
                         ));
-
                         completions.extend(hidden_longs_aliases(cmd).into_iter().filter(|comp| {
-                            comp.get_value().starts_with(format!("--{}", flag).as_str())
+                            comp.get_value().starts_with(format!("--{flag}").as_str())
                         }));
                     }
                 }
-            } else if arg.is_escape() || arg.is_stdio() || arg.is_empty() {
-                // HACK: Assuming knowledge of is_escape / is_stdio
-                completions.extend(longs_and_visible_aliases(cmd));
-
-                completions.extend(hidden_longs_aliases(cmd));
-            }
-
-            if arg.is_empty() || arg.is_stdio() {
-                let dash_or_arg = if arg.is_empty() {
-                    "-".into()
-                } else {
-                    arg.to_value_os().to_string_lossy()
-                };
-                // HACK: Assuming knowledge of is_stdio
-                completions.extend(
-                    shorts_and_visible_aliases(cmd)
-                        .into_iter()
-                        .map(|comp| comp.add_prefix(dash_or_arg.to_string())),
-                );
             } else if let Some(short) = arg.to_short() {
                 if !short.is_negative_number() {
                     // Find the first takes_values option.
@@ -215,17 +244,6 @@ fn complete_arg(
                     }
                 }
             }
-
-            if let Some(positional) = cmd
-                .get_positionals()
-                .find(|p| p.get_index() == Some(pos_index))
-            {
-                completions.extend(complete_arg_value(arg.to_value(), positional, current_dir));
-            }
-
-            if let Ok(value) = arg.to_value() {
-                completions.extend(complete_subcommand(value, cmd));
-            }
         }
         ParseState::Pos(..) => {
             if let Some(positional) = cmd
@@ -253,6 +271,28 @@ fn complete_arg(
     if completions.iter().any(|a| !a.is_hide_set()) {
         completions.retain(|a| !a.is_hide_set());
     }
+    let mut seen_ids = std::collections::HashSet::new();
+    completions.retain(move |a| {
+        if let Some(id) = a.get_id().cloned() {
+            seen_ids.insert(id)
+        } else {
+            true
+        }
+    });
+
+    let mut tags = Vec::new();
+    for candidate in &completions {
+        let tag = candidate.get_tag().cloned();
+        if !tags.contains(&tag) {
+            tags.push(tag);
+        }
+    }
+    completions.sort_by_key(|c| {
+        (
+            tags.iter().position(|t| c.get_tag() == t.as_ref()),
+            c.get_display_order(),
+        )
+    });
 
     Ok(completions)
 }
@@ -290,10 +330,10 @@ fn complete_arg_value(
         }
     } else {
         match arg.get_value_hint() {
-            clap::ValueHint::Other => {
+            clap::ValueHint::Unknown | clap::ValueHint::Other => {
                 // Should not complete
             }
-            clap::ValueHint::Unknown | clap::ValueHint::AnyPath => {
+            clap::ValueHint::AnyPath => {
                 values.extend(complete_path(value_os, current_dir, &|_| true));
             }
             clap::ValueHint::FilePath => {
@@ -330,6 +370,17 @@ fn complete_arg_value(
             .map(|comp| comp.add_prefix(prefix))
             .collect();
     }
+    values = values
+        .into_iter()
+        .map(|comp| {
+            if comp.get_tag().is_some() {
+                comp
+            } else {
+                comp.tag(Some(arg.to_string().into()))
+            }
+        })
+        .collect();
+
     values
 }
 
@@ -340,9 +391,7 @@ fn rsplit_delimiter<'s, 'o>(
     let delimiter = delimiter?;
     let value = value.ok()?;
     let pos = value.rfind(delimiter)?;
-    let (prefix, value) = value
-        .split_at_checked(pos + delimiter.len_utf8())
-        .expect("since delimiter was found, it is within bounds");
+    let (prefix, value) = value.split_at(pos + delimiter.len_utf8());
     Some((Some(prefix), Ok(value)))
 }
 
@@ -364,13 +413,35 @@ fn complete_subcommand(value: &str, cmd: &clap::Command) -> Vec<CompletionCandid
         value
     );
 
-    let mut scs = subcommands(cmd)
+    let mut scs: Vec<CompletionCandidate> = subcommands(cmd)
         .into_iter()
         .filter(|x| x.get_value().starts_with(value))
-        .collect::<Vec<_>>();
+        .collect();
+    if cmd.is_allow_external_subcommands_set() {
+        let external_completer = cmd.get::<SubcommandCandidates>();
+        if let Some(completer) = external_completer {
+            scs.extend(complete_external_subcommand(value, completer));
+        }
+    }
+
     scs.sort();
     scs.dedup();
     scs
+}
+
+fn complete_external_subcommand(
+    value: &str,
+    completer: &SubcommandCandidates,
+) -> Vec<CompletionCandidate> {
+    debug!("complete_custom_arg_value: completer={completer:?}, value={value:?}");
+
+    let mut values = Vec::new();
+    let custom_arg_values = completer.candidates();
+    values.extend(custom_arg_values);
+
+    values.retain(|comp| comp.get_value().starts_with(value));
+
+    values
 }
 
 /// Gets all the long options, their visible aliases and flags of a [`clap::Command`] with formatted `--` prefix.
@@ -381,11 +452,9 @@ fn longs_and_visible_aliases(p: &clap::Command) -> Vec<CompletionCandidate> {
     p.get_arguments()
         .filter_map(|a| {
             a.get_long_and_visible_aliases().map(|longs| {
-                longs.into_iter().map(|s| {
-                    CompletionCandidate::new(format!("--{}", s))
-                        .help(a.get_help().cloned())
-                        .hide(a.is_hide_set())
-                })
+                longs
+                    .into_iter()
+                    .map(|s| populate_arg_candidate(CompletionCandidate::new(format!("--{s}")), a))
             })
         })
         .flatten()
@@ -400,9 +469,7 @@ fn hidden_longs_aliases(p: &clap::Command) -> Vec<CompletionCandidate> {
         .filter_map(|a| {
             a.get_aliases().map(|longs| {
                 longs.into_iter().map(|s| {
-                    CompletionCandidate::new(format!("--{}", s))
-                        .help(a.get_help().cloned())
-                        .hide(true)
+                    populate_arg_candidate(CompletionCandidate::new(format!("--{s}")), a).hide(true)
                 })
             })
         })
@@ -419,14 +486,30 @@ fn shorts_and_visible_aliases(p: &clap::Command) -> Vec<CompletionCandidate> {
         .filter_map(|a| {
             a.get_short_and_visible_aliases().map(|shorts| {
                 shorts.into_iter().map(|s| {
-                    CompletionCandidate::new(s.to_string())
-                        .help(a.get_help().cloned())
-                        .hide(a.is_hide_set())
+                    populate_arg_candidate(CompletionCandidate::new(s.to_string()), a).help(
+                        a.get_help()
+                            .cloned()
+                            .or_else(|| a.get_long().map(|long| format!("--{long}").into())),
+                    )
                 })
             })
         })
         .flatten()
         .collect()
+}
+
+fn populate_arg_candidate(candidate: CompletionCandidate, arg: &clap::Arg) -> CompletionCandidate {
+    candidate
+        .help(arg.get_help().cloned())
+        .id(Some(format!("arg::{}", arg.get_id())))
+        .tag(Some(
+            arg.get_help_heading()
+                .unwrap_or("Options")
+                .to_owned()
+                .into(),
+        ))
+        .display_order(Some(arg.get_display_order()))
+        .hide(arg.is_hide_set())
 }
 
 /// Get the possible values for completion
@@ -451,20 +534,32 @@ fn subcommands(p: &clap::Command) -> Vec<CompletionCandidate> {
         .flat_map(|sc| {
             sc.get_name_and_visible_aliases()
                 .into_iter()
-                .map(|s| {
-                    CompletionCandidate::new(s.to_string())
-                        .help(sc.get_about().cloned())
-                        .hide(sc.is_hide_set())
-                })
+                .map(|s| populate_command_candidate(CompletionCandidate::new(s.to_string()), p, sc))
                 .chain(sc.get_aliases().map(|s| {
-                    CompletionCandidate::new(s.to_string())
-                        .help(sc.get_about().cloned())
+                    populate_command_candidate(CompletionCandidate::new(s.to_string()), p, sc)
                         .hide(true)
                 }))
         })
         .collect()
 }
 
+fn populate_command_candidate(
+    candidate: CompletionCandidate,
+    cmd: &clap::Command,
+    subcommand: &clap::Command,
+) -> CompletionCandidate {
+    candidate
+        .help(subcommand.get_about().cloned())
+        .id(Some(format!("command::{}", subcommand.get_name())))
+        .tag(Some(
+            cmd.get_subcommand_help_heading()
+                .unwrap_or("Commands")
+                .to_owned()
+                .into(),
+        ))
+        .display_order(Some(subcommand.get_display_order()))
+        .hide(subcommand.is_hide_set())
+}
 /// Parse the short flags and find the first `takes_values` option.
 fn parse_shortflags<'c, 's>(
     cmd: &'c clap::Command,

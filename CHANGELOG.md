@@ -20,6 +20,30 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [4.5.21] - 2024-11-13
+
+### Fixes
+
+- *(parser)* Ensure defaults are filled in on error with `ignore_errors(true)`
+
+## [4.5.20] - 2024-10-08
+
+### Features
+
+- *(unstable)* Add `CommandExt`
+
+## [4.5.19] - 2024-10-01
+
+### Internal
+
+- Update dependencies
+
+## [4.5.18] - 2024-09-20
+
+### Features
+
+- *(builder)* Expose `Arg::get_display_order` and `Command::get_display_order`
+
 ## [4.5.17] - 2024-09-04
 
 ### Fixes
@@ -4635,7 +4659,11 @@ Minimum version of Rust is now v1.13.0 (Stable)
 * **arg**  allow lifetimes other than 'static in arguments ([9e8c1fb9](https://github.com/clap-rs/clap/commit/9e8c1fb9406f8448873ca58bab07fe905f1551e5))
 
 <!-- next-url -->
-[Unreleased]: https://github.com/clap-rs/clap/compare/v4.5.17...HEAD
+[Unreleased]: https://github.com/clap-rs/clap/compare/v4.5.21...HEAD
+[4.5.21]: https://github.com/clap-rs/clap/compare/v4.5.20...v4.5.21
+[4.5.20]: https://github.com/clap-rs/clap/compare/v4.5.19...v4.5.20
+[4.5.19]: https://github.com/clap-rs/clap/compare/v4.5.18...v4.5.19
+[4.5.18]: https://github.com/clap-rs/clap/compare/v4.5.17...v4.5.18
 [4.5.17]: https://github.com/clap-rs/clap/compare/v4.5.16...v4.5.17
 [4.5.16]: https://github.com/clap-rs/clap/compare/v4.5.15...v4.5.16
 [4.5.15]: https://github.com/clap-rs/clap/compare/v4.5.14...v4.5.15

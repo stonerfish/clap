@@ -1,10 +1,13 @@
+#[allow(unused_imports)]
 use snapbox::assert_data_eq;
 
 use crate::common;
 
 #[cfg(unix)]
+#[cfg(feature = "unstable-shell-tests")]
 const CMD: &str = "zsh";
 #[cfg(unix)]
+#[cfg(feature = "unstable-shell-tests")]
 type RuntimeBuilder = completest_pty::ZshRuntimeBuilder;
 
 #[test]
@@ -142,12 +145,14 @@ fn subcommand_last() {
 
 #[test]
 #[cfg(unix)]
+#[cfg(feature = "unstable-shell-tests")]
 fn register_completion() {
     common::register_example::<RuntimeBuilder>("static", "exhaustive");
 }
 
 #[test]
 #[cfg(unix)]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete() {
     if !common::has_command(CMD) {
         return;
@@ -168,12 +173,14 @@ pacman  action  alias  value  quote  hint  last  --
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn register_dynamic_env() {
     common::register_example::<RuntimeBuilder>("dynamic-env", "exhaustive");
 }
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete_dynamic_env_toplevel() {
     if !common::has_command(CMD) {
         return;
@@ -185,8 +192,12 @@ fn complete_dynamic_env_toplevel() {
     let input = "exhaustive \t\t";
     let expected = snapbox::str![[r#"
 % exhaustive
---generate  --help      -V          action      help        last        quote       
---global    --version   -h          alias       hint        pacman      value       
+--generate  -- generate
+--global    -- everywhere
+--help      -- Print help
+--version   -- Print version
+help        -- Print this message or the help of the given subcommand(s)
+action  alias   hint    last    pacman  quote   value
 "#]];
     let actual = runtime.complete(input, &term).unwrap();
     assert_data_eq!(actual, expected);
@@ -194,6 +205,7 @@ fn complete_dynamic_env_toplevel() {
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete_dynamic_env_quoted_help() {
     if !common::has_command(CMD) {
         return;
@@ -205,10 +217,18 @@ fn complete_dynamic_env_quoted_help() {
     let input = "exhaustive quote \t\t";
     let expected = snapbox::str![[r#"
 % exhaustive quote
---backslash        --double-quotes    --single-quotes    cmd-backslash      cmd-expansions     
---backticks        --expansions       --version          cmd-backticks      cmd-single-quotes  
---brackets         --global           -V                 cmd-brackets       escape-help        
---choice           --help             -h                 cmd-double-quotes  help               
+--global                            -- everywhere                                                                     
+--help                              -- Print help (see more with '--help')                                            
+--version                           -- Print version                                                                  
+cmd-backslash      --backslash      -- Avoid '/n'                                                                     
+cmd-backticks      --backticks      -- For more information see `echo test`                                           
+cmd-brackets       --brackets       -- List packages [filter]                                                         
+cmd-double-quotes  --double-quotes  -- Can be "always", "auto", or "never"                                            
+cmd-expansions     --expansions     -- Execute the shell command with $SHELL                                          
+cmd-single-quotes  --single-quotes  -- Can be 'always', 'auto', or 'never'                                            
+escape-help                         -- /tab/t"'                                                                       
+help                                -- Print this message or the help of the given subcommand(s)                      
+--choice
 "#]];
     let actual = runtime.complete(input, &term).unwrap();
     assert_data_eq!(actual, expected);
@@ -216,6 +236,7 @@ fn complete_dynamic_env_quoted_help() {
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete_dynamic_env_option_value() {
     if !common::has_command(CMD) {
         return;
@@ -240,6 +261,7 @@ fn complete_dynamic_env_option_value() {
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete_dynamic_env_quoted_value() {
     if !common::has_command(CMD) {
         return;
@@ -251,7 +273,10 @@ fn complete_dynamic_env_quoted_value() {
     let input = "exhaustive quote --choice \t\t";
     let expected = snapbox::str![[r#"
 % exhaustive quote --choice
-another/ shell  bash            fish            zsh
+another shell  -- something with a space
+bash           -- bash (shell)
+fish           -- fish shell
+zsh            -- zsh shell
 "#]];
     let actual = runtime.complete(input, &term).unwrap();
     assert_data_eq!(actual, expected);

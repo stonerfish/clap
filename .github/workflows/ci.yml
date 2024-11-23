@@ -49,15 +49,15 @@ jobs:
           rust: "stable"
           features: "full"
         - build: minimal
-          os: ubuntu-latest
+          os: buildjet-8vcpu-ubuntu-2204
           rust: "stable"
           features: "minimal"
         - build: default
-          os: ubuntu-latest
+          os: buildjet-8vcpu-ubuntu-2204
           rust: "stable"
           features: "default"
         - build: next
-          os: ubuntu-latest
+          os: buildjet-8vcpu-ubuntu-2204
           rust: "stable"
           features: "next"
     continue-on-error: ${{ matrix.rust != 'stable' }}
@@ -70,9 +70,6 @@ jobs:
       with:
         toolchain: ${{ matrix.rust }}
     - uses: Swatinem/rust-cache@v2
-    - name: Install shells
-      if: runner.os == 'Linux'
-      run: sudo apt-get install -y elvish fish zsh
     - name: Build
       run: make build-${{matrix.features}}
     - name: Test
@@ -84,6 +81,35 @@ jobs:
       run: make test-minimal ARGS='--manifest-path Cargo.toml'
     - name: Test dynamic completions
       run: cargo test -p clap_complete -F unstable-dynamic
+  shell-integration:
+    name: Shell Integration
+    runs-on: buildjet-8vcpu-ubuntu-2204
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
+    - uses: Swatinem/rust-cache@v2
+    - name: Install shells
+      if: runner.os == 'Linux'
+      run: sudo apt-get install -y elvish fish zsh
+    - name: clap_complete
+      run: cargo test -p clap_complete -F unstable-dynamic -F unstable-shell-tests
+  shell-integration-nu:
+    name: Nushell Integration
+    runs-on: buildjet-8vcpu-ubuntu-2204
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
+    - uses: Swatinem/rust-cache@v2
+    - name: clap_complete_nu
+      run: cargo test -p clap_complete_nushell -F unstable-shell-tests
   check:
     name: Check
     runs-on: ubuntu-latest
@@ -138,7 +164,7 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
       with:
-        toolchain: "1.80"  # STABLE
+        toolchain: "1.82"  # STABLE
     - uses: Swatinem/rust-cache@v2
     - name: UI Tests
       run: make test-ui-${{ matrix.features }}
@@ -181,7 +207,7 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
       with:
-        toolchain: "1.80"  # STABLE
+        toolchain: "1.82"  # STABLE
     - uses: Swatinem/rust-cache@v2
     - name: Check documentation
       env:
@@ -196,7 +222,7 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
       with:
-        toolchain: "1.80"  # STABLE
+        toolchain: "1.82"  # STABLE
         components: rustfmt
     - uses: Swatinem/rust-cache@v2
     - name: Check formatting
@@ -210,7 +236,7 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
       with:
-        toolchain: "1.80"  # STABLE
+        toolchain: "1.82"  # STABLE
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - name: Lint (ultra-minimal)

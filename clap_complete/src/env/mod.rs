@@ -24,12 +24,16 @@
 //!
 //! To source your completions:
 //!
+//! <div class="warning">
+//!
 //! **WARNING:** We recommend re-sourcing your completions on upgrade.
 //! These completions work by generating shell code that calls into `your_program` while completing.
 //! That interface is unstable and a mismatch between the shell code and `your_program` may result
 //! in either invalid completions or no completions being generated.
 //! For this reason, we recommend generating the shell code anew on shell startup so that it is
 //! "self-correcting" on shell launch, rather than writing the generated completions to a file.
+//!
+//! </div>
 //!
 //! Bash
 //! ```bash
@@ -38,7 +42,7 @@
 //!
 //! Elvish
 //! ```elvish
-//! echo "eval (COMPLETE=elvish your_program)" >> ~/.elvish/rc.elv
+//! echo "eval (E:COMPLETE=elvish your_program | slurp)" >> ~/.elvish/rc.elv
 //! ```
 //!
 //! Fish
@@ -91,10 +95,12 @@ pub use shells::*;
 pub struct CompleteEnv<'s, F> {
     factory: F,
     var: &'static str,
+    bin: Option<String>,
+    completer: Option<String>,
     shells: Shells<'s>,
 }
 
-impl<'s, F: FnOnce() -> clap::Command> CompleteEnv<'s, F> {
+impl<'s, F: Fn() -> clap::Command> CompleteEnv<'s, F> {
     /// Complete a [`clap::Command`]
     ///
     /// # Example
@@ -137,6 +143,8 @@ impl<'s, F: FnOnce() -> clap::Command> CompleteEnv<'s, F> {
         Self {
             factory,
             var: "COMPLETE",
+            bin: None,
+            completer: None,
             shells: Shells::builtins(),
         }
     }
@@ -147,6 +155,22 @@ impl<'s, F: FnOnce() -> clap::Command> CompleteEnv<'s, F> {
         self
     }
 
+    /// Override the name of the binary to complete
+    ///
+    /// Default: `Command::get_bin_name`
+    pub fn bin(mut self, bin: impl Into<String>) -> Self {
+        self.bin = Some(bin.into());
+        self
+    }
+
+    /// Override the binary to call to get completions
+    ///
+    /// Default: `args_os()[0]`
+    pub fn completer(mut self, completer: impl Into<String>) -> Self {
+        self.completer = Some(completer.into());
+        self
+    }
+
     /// Override the shells supported for completions
     pub fn shells(mut self, shells: Shells<'s>) -> Self {
         self.shells = shells;
@@ -154,7 +178,7 @@ impl<'s, F: FnOnce() -> clap::Command> CompleteEnv<'s, F> {
     }
 }
 
-impl<'s, F: FnOnce() -> clap::Command> CompleteEnv<'s, F> {
+impl<'s, F: Fn() -> clap::Command> CompleteEnv<'s, F> {
     /// Process the completion request and exit
     ///
     /// **Warning:** `stdout` should not be written to before this has had a
@@ -197,31 +221,12 @@ impl<'s, F: FnOnce() -> clap::Command> CompleteEnv<'s, F> {
         // completion logic.
         std::env::remove_var(self.var);
 
-        // Strip off the parent dir in case `$SHELL` was used
-        let name = std::path::Path::new(&name).file_stem().unwrap_or(&name);
-        // lossy won't match but this will delegate to unknown
-        // error
-        let name = name.to_string_lossy();
-
-        let shell = self.shells.completer(&name).ok_or_else(|| {
-            let shells = self
-                .shells
-                .names()
-                .enumerate()
-                .map(|(i, name)| {
-                    let prefix = if i == 0 { "" } else { ", " };
-                    format!("{prefix}`{name}`")
-                })
-                .collect::<String>();
-            std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!("unknown shell `{name}`, expected one of {shells}"),
-            )
-        })?;
+        let shell = self.shell(std::path::Path::new(&name))?;
 
         let mut cmd = (self.factory)();
         cmd.build();
 
+        let completer = args.remove(0);
         let escape_index = args
             .iter()
             .position(|a| *a == "--")
@@ -229,11 +234,8 @@ impl<'s, F: FnOnce() -> clap::Command> CompleteEnv<'s, F> {
             .unwrap_or(args.len());
         args.drain(0..escape_index);
         if args.is_empty() {
-            let name = cmd.get_name();
-            let bin = cmd.get_bin_name().unwrap_or_else(|| cmd.get_name());
-
             let mut buf = Vec::new();
-            shell.write_registration(self.var, name, bin, bin, &mut buf)?;
+            self.write_registration(&cmd, current_dir, shell, completer, &mut buf)?;
             std::io::stdout().write_all(&buf)?;
         } else {
             let mut buf = Vec::new();
@@ -242,6 +244,63 @@ impl<'s, F: FnOnce() -> clap::Command> CompleteEnv<'s, F> {
         }
 
         Ok(true)
+    }
+
+    fn shell(&self, name: &std::path::Path) -> Result<&dyn EnvCompleter, std::io::Error> {
+        // Strip off the parent dir in case `$SHELL` was used
+        let name = name.file_stem().unwrap_or(name.as_os_str());
+        // lossy won't match but this will delegate to unknown
+        // error
+        let name = name.to_string_lossy();
+
+        let shell = self.shells.completer(&name).ok_or_else(|| {
+            let shells =
+                self.shells
+                    .names()
+                    .enumerate()
+                    .fold(String::new(), |mut seed, (i, name)| {
+                        use std::fmt::Write as _;
+                        let prefix = if i == 0 { "" } else { ", " };
+                        let _ = write!(&mut seed, "{prefix}`{name}`");
+                        seed
+                    });
+            std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("unknown shell `{name}`, expected one of {shells}"),
+            )
+        })?;
+        Ok(shell)
+    }
+
+    fn write_registration(
+        &self,
+        cmd: &clap::Command,
+        current_dir: Option<&std::path::Path>,
+        shell: &dyn EnvCompleter,
+        completer: OsString,
+        buf: &mut dyn std::io::Write,
+    ) -> Result<(), std::io::Error> {
+        let name = cmd.get_name();
+        let bin = self
+            .bin
+            .as_deref()
+            .or_else(|| cmd.get_bin_name())
+            .unwrap_or_else(|| cmd.get_name());
+        let completer = if let Some(completer) = self.completer.as_deref() {
+            completer.to_owned()
+        } else {
+            let mut completer = std::path::PathBuf::from(completer);
+            if let Some(current_dir) = current_dir {
+                if 1 < completer.components().count() {
+                    completer = current_dir.join(completer);
+                }
+            }
+            completer.to_string_lossy().into_owned()
+        };
+
+        shell.write_registration(self.var, name, bin, &completer, buf)?;
+
+        Ok(())
     }
 }
 
@@ -295,9 +354,18 @@ pub trait EnvCompleter {
     /// Write the `buf` the logic needed for calling into `<VAR>=<shell> <cmd> --`, passing needed
     /// arguments to [`EnvCompleter::write_complete`] through the environment.
     ///
+    /// - `var`: see [`CompleteEnv::var`]
+    /// - `name`: an identifier to use in the script
+    /// - `bin`: see [`CompleteEnv::bin`]
+    /// - `completer`: see [`CompleteEnv::completer`]
+    ///
+    /// <div class="warning">
+    ///
     /// **WARNING:** There are no stability guarantees between the call to
     /// [`EnvCompleter::write_complete`] that this generates and actually calling [`EnvCompleter::write_complete`].
     /// Caching the results of this call may result in invalid or no completions to be generated.
+    ///
+    /// </div>
     fn write_registration(
         &self,
         var: &str,

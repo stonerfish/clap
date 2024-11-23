@@ -1,10 +1,13 @@
+#[allow(unused_imports)]
 use snapbox::assert_data_eq;
 
 use crate::common;
 
 #[cfg(unix)]
+#[cfg(feature = "unstable-shell-tests")]
 const CMD: &str = "bash";
 #[cfg(unix)]
+#[cfg(feature = "unstable-shell-tests")]
 type RuntimeBuilder = completest_pty::BashRuntimeBuilder;
 
 #[test]
@@ -142,12 +145,14 @@ fn subcommand_last() {
 
 #[test]
 #[cfg(unix)]
+#[cfg(feature = "unstable-shell-tests")]
 fn register_completion() {
     common::register_example::<RuntimeBuilder>("static", "exhaustive");
 }
 
 #[test]
 #[cfg(unix)]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete() {
     if !common::has_command(CMD) {
         return;
@@ -193,8 +198,7 @@ fn complete() {
                 && actual.contains("b_file")
                 && actual.contains("c_dir")
                 && actual.contains("d_dir"),
-            "Actual output:\n{}",
-            actual
+            "Actual output:\n{actual}"
         );
 
         let input = format!(
@@ -207,8 +211,7 @@ fn complete() {
                 && !actual.contains("b_file")
                 && actual.contains("c_dir")
                 && actual.contains("d_dir"),
-            "Actual output:\n{}",
-            actual
+            "Actual output:\n{actual}"
         );
     }
 
@@ -238,12 +241,14 @@ fn complete() {
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn register_dynamic_env() {
     common::register_example::<RuntimeBuilder>("dynamic-env", "exhaustive");
 }
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete_dynamic_env_toplevel() {
     if !common::has_command(CMD) {
         return;
@@ -255,8 +260,8 @@ fn complete_dynamic_env_toplevel() {
     let input = "exhaustive \t\t";
     let expected = snapbox::str![[r#"
 % 
---global    --help      -h          action      help        last        quote       
---generate  --version   -V          alias       hint        pacman      value       
+action      value       last        hint        --global    --help      
+quote       pacman      alias       help        --generate  --version   
 "#]];
     let actual = runtime.complete(input, &term).unwrap();
     assert_data_eq!(actual, expected);
@@ -264,6 +269,7 @@ fn complete_dynamic_env_toplevel() {
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete_dynamic_env_quoted_help() {
     if !common::has_command(CMD) {
         return;
@@ -275,10 +281,9 @@ fn complete_dynamic_env_quoted_help() {
     let input = "exhaustive quote \t\t";
     let expected = snapbox::str![[r#"
 % 
---single-quotes    --brackets         --help             cmd-backslash      cmd-expansions     
---double-quotes    --expansions       --version          cmd-backticks      cmd-single-quotes  
---backticks        --choice           -h                 cmd-brackets       escape-help        
---backslash        --global           -V                 cmd-double-quotes  help               
+cmd-single-quotes  cmd-backslash      escape-help        --global           --backslash        --choice
+cmd-double-quotes  cmd-brackets       help               --double-quotes    --brackets         --help
+cmd-backticks      cmd-expansions     --single-quotes    --backticks        --expansions       --version
 "#]];
     let actual = runtime.complete(input, &term).unwrap();
     assert_data_eq!(actual, expected);
@@ -286,6 +291,7 @@ fn complete_dynamic_env_quoted_help() {
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete_dynamic_env_option_value() {
     if !common::has_command(CMD) {
         return;
@@ -307,6 +313,7 @@ fn complete_dynamic_env_option_value() {
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete_dynamic_env_quoted_value() {
     if !common::has_command(CMD) {
         return;

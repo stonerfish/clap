@@ -1,9 +1,12 @@
 use crate::common;
+#[allow(unused_imports)]
 use snapbox::assert_data_eq;
 
 #[cfg(unix)]
+#[cfg(feature = "unstable-shell-tests")]
 const CMD: &str = "fish";
 #[cfg(unix)]
+#[cfg(feature = "unstable-shell-tests")]
 type RuntimeBuilder = completest_pty::FishRuntimeBuilder;
 
 #[test]
@@ -141,12 +144,14 @@ fn subcommand_last() {
 
 #[test]
 #[cfg(unix)]
+#[cfg(feature = "unstable-shell-tests")]
 fn register_completion() {
     common::register_example::<RuntimeBuilder>("static", "exhaustive");
 }
 
 #[test]
 #[cfg(unix)]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete() {
     if !common::has_command(CMD) {
         return;
@@ -175,12 +180,14 @@ another shell  (something with a space)  bash  (bash (shell))  fish  (fish shell
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn register_dynamic_env() {
     common::register_example::<RuntimeBuilder>("dynamic-env", "exhaustive");
 }
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete_dynamic_env_toplevel() {
     if !common::has_command(CMD) {
         return;
@@ -191,12 +198,10 @@ fn complete_dynamic_env_toplevel() {
 
     let input = "exhaustive \t\t";
     let expected = snapbox::str![[r#"
-% exhaustive --global 
---global      (everywhere)  -V                                                (Print version)  last  
---generate      (generate)  action                                                             pacman
---help        (Print help)  alias                                                              quote 
---version  (Print version)  help  (Print this message or the help of the given subcommand(s))  value 
--h            (Print help)  hint                                                               
+% exhaustive action 
+action  pacman  hint                                                               --generate      (generate)
+quote   last    help  (Print this message or the help of the given subcommand(s))  --help        (Print help)
+value   alias   --global                                             (everywhere)  --version  (Print version)
 "#]];
     let actual = runtime.complete(input, &term).unwrap();
     assert_data_eq!(actual, expected);
@@ -204,6 +209,7 @@ fn complete_dynamic_env_toplevel() {
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete_dynamic_env_quoted_help() {
     if !common::has_command(CMD) {
         return;
@@ -215,26 +221,24 @@ fn complete_dynamic_env_quoted_help() {
     let input = "exhaustive quote \t\t";
     let expected = snapbox::str![[r#"
 % exhaustive quote 
+cmd-single-quotes           (Can be 'always', 'auto', or 'never')
+cmd-double-quotes           (Can be "always", "auto", or "never")
+cmd-backticks              (For more information see `echo test`)
+cmd-backslash                                        (Avoid '/n')
+cmd-brackets                             (List packages [filter])
+cmd-expansions            (Execute the shell command with $SHELL)
+escape-help                                             (/tab "')
+help  (Print this message or the help of the given subcommand(s))
 --single-quotes             (Can be 'always', 'auto', or 'never')
+--global                                             (everywhere)
 --double-quotes             (Can be "always", "auto", or "never")
 --backticks                (For more information see `echo test`)
 --backslash                                          (Avoid '/n')
 --brackets                               (List packages [filter])
 --expansions              (Execute the shell command with $SHELL)
 --choice                                                         
---global                                             (everywhere)
 --help                      (Print help (see more with '--help'))
 --version                                         (Print version)
--h                          (Print help (see more with '--help'))
--V                                                (Print version)
-cmd-backslash                                        (Avoid '/n')
-cmd-backticks              (For more information see `echo test`)
-cmd-brackets                             (List packages [filter])
-cmd-double-quotes           (Can be "always", "auto", or "never")
-cmd-expansions            (Execute the shell command with $SHELL)
-cmd-single-quotes           (Can be 'always', 'auto', or 'never')
-escape-help                                             (/tab "')
-help  (Print this message or the help of the given subcommand(s))
 "#]];
     let actual = runtime.complete(input, &term).unwrap();
     assert_data_eq!(actual, expected);
@@ -242,6 +246,7 @@ help  (Print this message or the help of the given subcommand(s))
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete_dynamic_env_option_value() {
     if !common::has_command(CMD) {
         return;
@@ -266,6 +271,7 @@ fn complete_dynamic_env_option_value() {
 
 #[test]
 #[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
 fn complete_dynamic_env_quoted_value() {
     if !common::has_command(CMD) {
         return;

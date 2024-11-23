@@ -3,7 +3,10 @@ use clap_complete::{generate, Generator, Shell};
 
 fn main() {
     #[cfg(feature = "unstable-dynamic")]
-    clap_complete::CompleteEnv::with_factory(cli).complete();
+    clap_complete::CompleteEnv::with_factory(cli)
+        // Avoid tests snapshotting a path into `target/`
+        .completer("exhaustive")
+        .complete();
 
     let matches = cli().get_matches();
     if let Some(generator) = matches.get_one::<Shell>("generate") {
@@ -13,7 +16,7 @@ fn main() {
         return;
     }
 
-    println!("{:?}", matches);
+    println!("{matches:?}");
 }
 
 fn print_completions<G: Generator>(gen: G, cmd: &mut clap::Command) {

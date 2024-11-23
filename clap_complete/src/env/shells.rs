@@ -23,8 +23,6 @@ impl EnvCompleter for Bash {
         buf: &mut dyn std::io::Write,
     ) -> Result<(), std::io::Error> {
         let escaped_name = name.replace('-', "_");
-        let mut upper_name = escaped_name.clone();
-        upper_name.make_ascii_uppercase();
 
         let completer =
             shlex::try_quote(completer).unwrap_or(std::borrow::Cow::Borrowed(completer));
@@ -40,7 +38,7 @@ _clap_complete_NAME() {
         local _CLAP_COMPLETE_SPACE=true
     fi
     COMPREPLY=( $( \
-        IFS="$IFS" \
+        _CLAP_IFS="$IFS" \
         _CLAP_COMPLETE_INDEX="$_CLAP_COMPLETE_INDEX" \
         _CLAP_COMPLETE_COMP_TYPE="$_CLAP_COMPLETE_COMP_TYPE" \
         VAR="bash" \
@@ -61,7 +59,6 @@ fi
         .replace("NAME", &escaped_name)
         .replace("BIN", bin)
         .replace("COMPLETER", &completer)
-        .replace("UPPER", &upper_name)
         .replace("VAR", var);
 
         writeln!(buf, "{script}")?;
@@ -85,7 +82,7 @@ fi
         let _space: Option<bool> = std::env::var("_CLAP_COMPLETE_SPACE")
             .ok()
             .and_then(|i| i.parse().ok());
-        let ifs: Option<String> = std::env::var("IFS").ok().and_then(|i| i.parse().ok());
+        let ifs: Option<String> = std::env::var("_CLAP_IFS").ok().and_then(|i| i.parse().ok());
         let completions = crate::engine::complete(cmd, args, index, current_dir)?;
 
         for (i, candidate) in completions.iter().enumerate() {
@@ -124,7 +121,7 @@ impl FromStr for CompType {
             "33" => Ok(Self::Alternatives),
             "64" => Ok(Self::Unmodified),
             "37" => Ok(Self::Menu),
-            _ => Err(format!("unsupported COMP_TYPE `{}`", s)),
+            _ => Err(format!("unsupported COMP_TYPE `{s}`")),
         }
     }
 }
@@ -341,17 +338,18 @@ impl EnvCompleter for Zsh {
     fn write_registration(
         &self,
         var: &str,
-        _name: &str,
+        name: &str,
         bin: &str,
         completer: &str,
         buf: &mut dyn std::io::Write,
     ) -> Result<(), std::io::Error> {
+        let escaped_name = name.replace('-', "_");
         let bin = shlex::try_quote(bin).unwrap_or(std::borrow::Cow::Borrowed(bin));
         let completer =
             shlex::try_quote(completer).unwrap_or(std::borrow::Cow::Borrowed(completer));
 
         let script = r#"#compdef BIN
-function _clap_dynamic_completer() {
+function _clap_dynamic_completer_NAME() {
     local _CLAP_COMPLETE_INDEX=$(expr $CURRENT - 1)
     local _CLAP_IFS=$'\n'
 
@@ -363,11 +361,12 @@ function _clap_dynamic_completer() {
     )}")
 
     if [[ -n $completions ]]; then
-        compadd -a completions
+        _describe 'values' completions
     fi
 }
 
-compdef _clap_dynamic_completer BIN"#
+compdef _clap_dynamic_completer_NAME BIN"#
+            .replace("NAME", &escaped_name)
             .replace("COMPLETER", &completer)
             .replace("BIN", &bin)
             .replace("VAR", var);
@@ -399,8 +398,31 @@ compdef _clap_dynamic_completer BIN"#
             if i != 0 {
                 write!(buf, "{}", ifs.as_deref().unwrap_or("\n"))?;
             }
-            write!(buf, "{}", candidate.get_value().to_string_lossy())?;
+            write!(
+                buf,
+                "{}",
+                Self::escape_value(&candidate.get_value().to_string_lossy())
+            )?;
+            if let Some(help) = candidate.get_help() {
+                write!(
+                    buf,
+                    ":{}",
+                    Self::escape_help(help.to_string().lines().next().unwrap_or_default())
+                )?;
+            }
         }
         Ok(())
+    }
+}
+
+impl Zsh {
+    /// Escape value string
+    fn escape_value(string: &str) -> String {
+        string.replace('\\', "\\\\").replace(':', "\\:")
+    }
+
+    /// Escape help string
+    fn escape_help(string: &str) -> String {
+        string.replace('\\', "\\\\")
     }
 }

@@ -7,6 +7,78 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [4.5.38] - 2024-11-13
+
+## [4.5.37] - 2024-11-04
+
+### Fixes
+
+- *(dynamic)* Be compatible with package's MSRV
+
+## [4.5.36] - 2024-10-29
+
+### Fixes
+
+- *(zsh)* Change `ValueHint::Unknown` to `_default` in static completions
+
+## [4.5.35] - 2024-10-24
+
+## [4.5.34] - 2024-10-24
+
+### Features
+
+- *(dynamic)* Show description in zsh
+
+## [4.5.33] - 2024-10-08
+
+### Features
+
+- *(dynamic)* `SubcommandCandidates` support
+
+## [4.5.32] - 2024-10-02
+
+## [4.5.31] - 2024-10-02
+
+### Compatibility
+
+- *(dynamic)* `CompleteEnv::with_factory` now takes in a `Fn` instead of a `FnOnce`
+
+## [4.5.30] - 2024-10-02
+
+### Fixes
+
+- *(dynamic)* Don't default to `ValueHint::AnyPath` but "no completion"
+
+## [4.5.29] - 2024-09-20
+
+### Features
+
+- *(dynamic)* Change completion order to subcommands, positional values, flags
+- *(dynamic)* When completing `-[TAB]`, prioritize shorts over longs
+- *(dynamic)* De-duplicate completions that have the same result (longs, shorts, aliases)
+- *(dynamic)* Group candidates from the same `CompletionCandidate::tag`
+- *(dynamic)* Sort candidates within a `CompletionCandidate::tag` by their `display_order`
+
+## [4.5.28] - 2024-09-17
+
+### Compatibility
+
+- *(dynamic)* The binary called when completing is now `std::env::args_os()[0]`, rather than `Command::name`
+
+### Features
+
+- *(dynamic)* Allow overriding the binary being completed and the binary being called for completions
+
+### Fixes
+
+- *(dynamic)* By default, remove wrappers around a binary when calling for completions
+
+## [4.5.27] - 2024-09-17
+
+### Fixes
+
+- *(dynamic)* Fix completions for bash for at least some users
+
 ## [4.5.26] - 2024-09-05
 
 ### Features
@@ -414,7 +486,19 @@ MSRV changed to 1.64.0
 ## [3.0.1] - 2022-01-03
 
 <!-- next-url -->
-[Unreleased]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.26...HEAD
+[Unreleased]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.38...HEAD
+[4.5.38]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.37...clap_complete-v4.5.38
+[4.5.37]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.36...clap_complete-v4.5.37
+[4.5.36]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.35...clap_complete-v4.5.36
+[4.5.35]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.34...clap_complete-v4.5.35
+[4.5.34]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.33...clap_complete-v4.5.34
+[4.5.33]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.32...clap_complete-v4.5.33
+[4.5.32]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.31...clap_complete-v4.5.32
+[4.5.31]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.30...clap_complete-v4.5.31
+[4.5.30]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.29...clap_complete-v4.5.30
+[4.5.29]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.28...clap_complete-v4.5.29
+[4.5.28]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.27...clap_complete-v4.5.28
+[4.5.27]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.26...clap_complete-v4.5.27
 [4.5.26]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.25...clap_complete-v4.5.26
 [4.5.25]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.24...clap_complete-v4.5.25
 [4.5.24]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.23...clap_complete-v4.5.24
