@@ -10,12 +10,12 @@ ifneq (${TOOLCHAIN_TARGET},)
   ARGS+=--target ${TOOLCHAIN_TARGET}
 endif
 
-STABLE?=1.82
+STABLE?=1.83
 
 _FEATURES = minimal default wasm full debug release
 _FEATURES_minimal = --no-default-features --features "std"
 _FEATURES_default =
-_FEATURES_wasm = --no-default-features --features "std help usage error-context suggestions" --features "deprecated derive cargo env unicode string"
+_FEATURES_wasm = --no-default-features --features "std help usage error-context suggestions unstable-web-alert unstable-web-console unstable-web-urlargs" --features "deprecated derive cargo env unicode string"
 _FEATURES_full = --features "deprecated derive cargo env unicode string wrap_help unstable-ext"
 _FEATURES_next = ${_FEATURES_full} --features unstable-v5
 _FEATURES_debug = ${_FEATURES_full} --features debug --features clap_complete/debug
