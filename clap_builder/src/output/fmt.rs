@@ -34,11 +34,32 @@ impl Colorizer {
 impl Colorizer {
     #[cfg(feature = "color")]
     pub(crate) fn print(&self) -> std::io::Result<()> {
-        let color_when = match self.color_when {
-            ColorChoice::Always => anstream::ColorChoice::Always,
-            ColorChoice::Auto => anstream::ColorChoice::Auto,
-            ColorChoice::Never => anstream::ColorChoice::Never,
-        };
+        #[cfg(not(all(
+            any(feature = "unstable-web-alert", feature = "unstable-web-console"),
+            target_arch = "wasm32"
+        )))]
+        {
+            let color_when = match self.color_when {
+                ColorChoice::Always => anstream::ColorChoice::Always,
+                ColorChoice::Auto => anstream::ColorChoice::Auto,
+                ColorChoice::Never => anstream::ColorChoice::Never,
+            };
+
+            let mut stdout;
+            let mut stderr;
+            let writer: &mut dyn std::io::Write = match self.stream {
+                Stream::Stderr => {
+                    stderr = anstream::AutoStream::new(std::io::stderr().lock(), color_when);
+                    &mut stderr
+                }
+                Stream::Stdout => {
+                    stdout = anstream::AutoStream::new(std::io::stdout().lock(), color_when);
+                    &mut stdout
+                }
+            };
+
+            self.content.write_to(writer)
+        }
 
         #[cfg(all(
             any(feature = "unstable-web-alert", feature = "unstable-web-console"),
@@ -64,6 +85,7 @@ impl Colorizer {
 
             /*
             // use color control codes.
+            // for the future when we use color output on the alert
 
             match self.stream {
                 Stream::Stderr => {
@@ -76,22 +98,8 @@ impl Colorizer {
                 }
             };
             */
+            Ok(())
         }
-
-        let mut stdout;
-        let mut stderr;
-        let writer: &mut dyn std::io::Write = match self.stream {
-            Stream::Stderr => {
-                stderr = anstream::AutoStream::new(std::io::stderr().lock(), color_when);
-                &mut stderr
-            }
-            Stream::Stdout => {
-                stdout = anstream::AutoStream::new(std::io::stdout().lock(), color_when);
-                &mut stdout
-            }
-        };
-
-        self.content.write_to(writer)
     }
 
     #[cfg(not(feature = "color"))]
@@ -99,20 +107,6 @@ impl Colorizer {
         // [e]println can't be used here because it panics
         // if something went wrong. We don't want that.
 
-        #[cfg(all(
-            any(feature = "unstable-web-alert", feature = "unstable-web-console"),
-            target_arch = "wasm32"
-        ))]
-        match self.stream {
-            Stream::Stdout => {
-                let mut writer = cliw::output::stdout();
-                self.content.write_to(&mut writer);
-            }
-            Stream::Stderr => {
-                let mut writer = cliw::output::stderr();
-                self.content.write_to(&mut writer);
-            }
-        }
         #[cfg(not(all(
             any(feature = "unstable-web-alert", feature = "unstable-web-console"),
             target_arch = "wasm32"
@@ -127,6 +121,20 @@ impl Colorizer {
                 let stderr = std::io::stderr();
                 let mut stderr = stderr.lock();
                 self.content.write_to(&mut stderr)
+            }
+        }
+        #[cfg(all(
+            any(feature = "unstable-web-alert", feature = "unstable-web-console"),
+            target_arch = "wasm32"
+        ))]
+        match self.stream {
+            Stream::Stdout => {
+                let mut writer = cliw::output::stdout();
+                self.content.write_to(&mut writer);
+            }
+            Stream::Stderr => {
+                let mut writer = cliw::output::stderr();
+                self.content.write_to(&mut writer);
             }
         }
     }
