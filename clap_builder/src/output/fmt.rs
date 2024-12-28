@@ -130,11 +130,11 @@ impl Colorizer {
         match self.stream {
             Stream::Stdout => {
                 let mut writer = cliw::output::stdout();
-                self.content.write_to(&mut writer);
+                self.content.write_to(&mut writer)
             }
             Stream::Stderr => {
                 let mut writer = cliw::output::stderr();
-                self.content.write_to(&mut writer);
+                self.content.write_to(&mut writer)
             }
         }
     }
