@@ -142,6 +142,13 @@ impl StyledStr {
         self.0.push_str(&other.0);
     }
 
+    #[cfg(any(
+        not(all(
+            any(feature = "unstable-web-alert", feature = "unstable-web-console"),
+            target_arch = "wasm32"
+        )),
+        not(feature = "color")
+    ))]
     pub(crate) fn write_to(&self, buffer: &mut dyn std::io::Write) -> std::io::Result<()> {
         ok!(buffer.write_all(self.0.as_bytes()));
 
