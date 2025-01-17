@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [0.2.26] - 2025-01-10
+
+### Features
+
+- Respect `help_heading`
+
+## [0.2.25] - 2025-01-07
+
+### Fixes
+
+- Do not generate man pages for hidden subcommands
+
 ## [0.2.24] - 2024-10-08
 
 ## [0.2.23] - 2024-07-25
@@ -135,7 +147,9 @@ MSRV changed to 1.64.0
 - Expanded the documentation
 
 <!-- next-url -->
-[Unreleased]: https://github.com/clap-rs/clap/compare/clap_mangen-v0.2.24...HEAD
+[Unreleased]: https://github.com/clap-rs/clap/compare/clap_mangen-v0.2.26...HEAD
+[0.2.26]: https://github.com/clap-rs/clap/compare/clap_mangen-v0.2.25...clap_mangen-v0.2.26
+[0.2.25]: https://github.com/clap-rs/clap/compare/clap_mangen-v0.2.24...clap_mangen-v0.2.25
 [0.2.24]: https://github.com/clap-rs/clap/compare/clap_mangen-v0.2.23...clap_mangen-v0.2.24
 [0.2.23]: https://github.com/clap-rs/clap/compare/clap_mangen-v0.2.22...clap_mangen-v0.2.23
 [0.2.22]: https://github.com/clap-rs/clap/compare/clap_mangen-v0.2.21...clap_mangen-v0.2.22
