@@ -83,21 +83,6 @@ impl Colorizer {
                 }
             };
 
-            /*
-            // use color control codes.
-            // for the future when we use color output on the alert
-
-            match self.stream {
-                Stream::Stderr => {
-                    let mut writer = cliw::output::stderr();
-                    let _ = self.content.write_to(&mut writer);
-                }
-                Stream::Stdout => {
-                    let mut writer = cliw::output::stdout();
-                    let _ = self.content.write_to(&mut writer);
-                }
-            };
-            */
             Ok(())
         }
     }
