@@ -36,7 +36,7 @@ bench = false
 unstable-web-urlargs = ["cliw/urlargs"] # get args from url
 
 [dependencies]
-cliw = "0.1.0"
+cliw = "0.1.1"
 
 [lints]
 workspace = true

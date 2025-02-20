@@ -559,7 +559,9 @@ dependencies = [
 
 [[package]]
 name = "cliw"
-version = "0.1.0"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "147eea70fc3f16ab8c2d63db7fee09b4399bd74da4e648d6c7933a9d0aabe54f"
 dependencies = [
  "js-sys",
  "percent-encoding",
@@ -1475,7 +1477,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e310b3a6b5907f99202fcdb4960ff45b93735d7c7d96b760fcff8db2dc0e103d"
 dependencies = [
  "cfg-if",
- "windows-targets 0.48.5",
+ "windows-targets 0.52.6",
 ]
 
 [[package]]
