@@ -1,11 +1,15 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](http://keepachangelog.com/)
-and this project adheres to [Semantic Versioning](http://semver.org/).
+The format is based on [Keep a Changelog](https://keepachangelog.com/)
+and this project adheres to [Semantic Versioning](https://semver.org/).
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+
+## [0.7.6] - 2025-10-13
+
+## [0.7.5] - 2025-06-09
 
 ## [0.7.4] - 2024-12-05
 
@@ -115,7 +119,9 @@ MSRV changed to 1.64.0
 - Drop `memchr` dependency
 
 <!-- next-url -->
-[Unreleased]: https://github.com/clap-rs/clap/compare/clap_lex-v0.7.4...HEAD
+[Unreleased]: https://github.com/clap-rs/clap/compare/clap_lex-v0.7.6...HEAD
+[0.7.6]: https://github.com/clap-rs/clap/compare/clap_lex-v0.7.5...clap_lex-v0.7.6
+[0.7.5]: https://github.com/clap-rs/clap/compare/clap_lex-v0.7.4...clap_lex-v0.7.5
 [0.7.4]: https://github.com/clap-rs/clap/compare/clap_lex-v0.7.3...clap_lex-v0.7.4
 [0.7.3]: https://github.com/clap-rs/clap/compare/clap_lex-v0.7.2...clap_lex-v0.7.3
 [0.7.2]: https://github.com/clap-rs/clap/compare/clap_lex-v0.7.1...clap_lex-v0.7.2

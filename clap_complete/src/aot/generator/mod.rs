@@ -21,7 +21,7 @@ pub trait Generator {
     /// # Examples
     ///
     /// ```
-    /// # use std::io::Write;
+    /// # use std::io::{Error, Write};
     /// # use clap::Command;
     /// use clap_complete::Generator;
     ///
@@ -32,6 +32,7 @@ pub trait Generator {
     ///         format!("{name}.fish")
     ///     }
     /// #   fn generate(&self, cmd: &Command, buf: &mut dyn Write) {}
+    /// #   fn try_generate(&self, cmd: &Command, buf: &mut dyn Write) -> Result<(), Error> {Ok(())}
     /// }
     /// ```
     fn file_name(&self, name: &str) -> String;
@@ -48,7 +49,7 @@ pub trait Generator {
     /// as if it is printed using [`std::println`].
     ///
     /// ```
-    /// use std::{io::Write, fmt::write};
+    /// use std::{io::{Error, Write}, fmt::write};
     /// use clap::Command;
     /// use clap_complete::Generator;
     ///
@@ -61,9 +62,44 @@ pub trait Generator {
     ///     fn generate(&self, cmd: &Command, buf: &mut dyn Write) {
     ///         write!(buf, "{cmd}").unwrap();
     ///     }
+    /// #   fn try_generate(&self, cmd: &Command, buf: &mut dyn Write) -> Result<(), Error> {
+    /// #       write!(buf, "{cmd}")
+    /// #   }
     /// }
     /// ```
     fn generate(&self, cmd: &Command, buf: &mut dyn Write);
+
+    ///
+    /// Fallible version to generate output out of [`clap::Command`].
+    ///
+    /// # Examples
+    ///
+    /// The following example generator displays the [`clap::Command`]
+    /// as if it is printed using [`std::println`].
+    ///
+    /// ```
+    /// use std::{io::{Error, Write}, fmt::write};
+    /// use clap::Command;
+    /// use clap_complete::Generator;
+    ///
+    /// pub struct ClapDebug;
+    ///
+    /// impl Generator for ClapDebug {
+    /// #   fn file_name(&self, name: &str) -> String {
+    /// #       name.into()
+    /// #   }
+    /// #   fn generate(&self, cmd: &Command, buf: &mut dyn Write) {
+    /// #       self.try_generate(cmd, buf).expect("failed to write completion file");
+    /// #   }
+    ///     fn try_generate(&self, cmd: &Command, buf: &mut dyn Write) -> Result<(), Error> {
+    ///         write!(buf, "{cmd}")
+    ///     }
+    /// }
+    /// ```
+    fn try_generate(&self, cmd: &Command, buf: &mut dyn Write) -> Result<(), Error> {
+        self.generate(cmd, buf);
+        Ok(())
+    }
 }
 
 /// Generate a completions file for a specified shell at compile-time.
@@ -197,7 +233,7 @@ pub trait Generator {
 /// }
 /// ```
 pub fn generate_to<G, S, T>(
-    gen: G,
+    generator: G,
     cmd: &mut Command,
     bin_name: S,
     out_dir: T,
@@ -210,12 +246,12 @@ where
     cmd.set_bin_name(bin_name);
 
     let out_dir = PathBuf::from(out_dir.into());
-    let file_name = gen.file_name(cmd.get_bin_name().unwrap());
+    let file_name = generator.file_name(cmd.get_bin_name().unwrap());
 
     let path = out_dir.join(file_name);
     let mut file = File::create(&path)?;
 
-    _generate::<G>(gen, cmd, &mut file);
+    _generate::<G>(generator, cmd, &mut file);
     Ok(path)
 }
 
@@ -254,16 +290,16 @@ where
 /// ```console
 /// $ myapp generate-bash-completions > /usr/share/bash-completion/completions/myapp.bash
 /// ```
-pub fn generate<G, S>(gen: G, cmd: &mut Command, bin_name: S, buf: &mut dyn Write)
+pub fn generate<G, S>(generator: G, cmd: &mut Command, bin_name: S, buf: &mut dyn Write)
 where
     G: Generator,
     S: Into<String>,
 {
     cmd.set_bin_name(bin_name);
-    _generate::<G>(gen, cmd, buf);
+    _generate::<G>(generator, cmd, buf);
 }
 
-fn _generate<G: Generator>(gen: G, cmd: &mut Command, buf: &mut dyn Write) {
+fn _generate<G: Generator>(generator: G, cmd: &mut Command, buf: &mut dyn Write) {
     cmd.build();
-    gen.generate(cmd, buf);
+    generator.generate(cmd, buf);
 }

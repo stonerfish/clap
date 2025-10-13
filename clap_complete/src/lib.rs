@@ -31,8 +31,8 @@
 //!             .value_parser(value_parser!(Shell)))
 //! }
 //!
-//! fn print_completions<G: Generator>(gen: G, cmd: &mut Command) {
-//!     generate(gen, cmd, cmd.get_name().to_string(), &mut io::stdout());
+//! fn print_completions<G: Generator>(generator: G, cmd: &mut Command) {
+//!     generate(generator, cmd, cmd.get_name().to_string(), &mut io::stdout());
 //! }
 //!
 //! fn main() {
@@ -48,7 +48,7 @@
 
 #![doc(html_logo_url = "https://raw.githubusercontent.com/clap-rs/clap/master/assets/clap.png")]
 #![doc = include_str!("../README.md")]
-#![cfg_attr(docsrs, feature(doc_auto_cfg))]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 #![allow(clippy::needless_doctest_main)]
@@ -106,3 +106,7 @@ pub use aot::generate_to;
 pub use aot::Generator;
 /// Deprecated, see [`aot::Shell`]
 pub use aot::Shell;
+
+#[doc = include_str!("../README.md")]
+#[cfg(doctest)]
+pub struct ReadmeDoctests;

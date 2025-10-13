@@ -1,11 +1,24 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](http://keepachangelog.com/)
-and this project adheres to [Semantic Versioning](http://semver.org/).
+The format is based on [Keep a Changelog](https://keepachangelog.com/)
+and this project adheres to [Semantic Versioning](https://semver.org/).
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+
+## [0.2.30] - 2025-10-13
+
+## [0.2.29] - 2025-07-29
+
+### Features
+
+- Show multiple value names
+- Show optionality of flag values
+
+## [0.2.28] - 2025-07-09
+
+## [0.2.27] - 2025-06-09
 
 ## [0.2.26] - 2025-01-10
 
@@ -147,7 +160,11 @@ MSRV changed to 1.64.0
 - Expanded the documentation
 
 <!-- next-url -->
-[Unreleased]: https://github.com/clap-rs/clap/compare/clap_mangen-v0.2.26...HEAD
+[Unreleased]: https://github.com/clap-rs/clap/compare/clap_mangen-v0.2.30...HEAD
+[0.2.30]: https://github.com/clap-rs/clap/compare/clap_mangen-v0.2.29...clap_mangen-v0.2.30
+[0.2.29]: https://github.com/clap-rs/clap/compare/clap_mangen-v0.2.28...clap_mangen-v0.2.29
+[0.2.28]: https://github.com/clap-rs/clap/compare/clap_mangen-v0.2.27...clap_mangen-v0.2.28
+[0.2.27]: https://github.com/clap-rs/clap/compare/clap_mangen-v0.2.26...clap_mangen-v0.2.27
 [0.2.26]: https://github.com/clap-rs/clap/compare/clap_mangen-v0.2.25...clap_mangen-v0.2.26
 [0.2.25]: https://github.com/clap-rs/clap/compare/clap_mangen-v0.2.24...clap_mangen-v0.2.25
 [0.2.24]: https://github.com/clap-rs/clap/compare/clap_mangen-v0.2.23...clap_mangen-v0.2.24

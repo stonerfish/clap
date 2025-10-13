@@ -264,6 +264,26 @@ goodbye-world
 }
 
 #[test]
+fn suggest_subcommand_positional_after_escape() {
+    let mut cmd = Command::new("exhaustive").subcommand(Command::new("hello-world").arg(
+        clap::Arg::new("hello-world").value_parser([
+            PossibleValue::new("hello-world").help("Say hello to the world"),
+            "hello-moon".into(),
+            "goodbye-world".into(),
+        ]),
+    ));
+
+    assert_data_eq!(
+        complete!(cmd, "hello-world -- [TAB]"),
+        snapbox::str![[r#"
+hello-world	Say hello to the world
+hello-moon
+goodbye-world
+"#]],
+    );
+}
+
+#[test]
 fn suggest_argument_value() {
     let mut cmd = Command::new("dynamic")
         .arg(
@@ -506,9 +526,13 @@ fn suggest_value_hint_file_path() {
     let testdir_path = testdir.path().unwrap();
 
     fs::write(testdir_path.join("a_file"), "").unwrap();
+    fs::write(testdir_path.join(".a_file"), "").unwrap();
     fs::write(testdir_path.join("b_file"), "").unwrap();
+    fs::write(testdir_path.join(".b_file"), "").unwrap();
     fs::create_dir_all(testdir_path.join("c_dir")).unwrap();
+    fs::create_dir_all(testdir_path.join(".c_dir")).unwrap();
     fs::create_dir_all(testdir_path.join("d_dir")).unwrap();
+    fs::create_dir_all(testdir_path.join(".d_dir")).unwrap();
 
     assert_data_eq!(
         complete!(cmd, "--input [TAB]", current_dir = Some(testdir_path)),
@@ -524,16 +548,34 @@ d_dir/
         complete!(cmd, "--input a[TAB]", current_dir = Some(testdir_path)),
         snapbox::str!["a_file"],
     );
+    assert_data_eq!(
+        complete!(cmd, "--input .[TAB]", current_dir = Some(testdir_path)),
+        snapbox::str![[r#"
+./a_file
+./b_file
+./c_dir/
+./d_dir/
+"#]],
+    );
+    assert_data_eq!(
+        complete!(cmd, "--input .a[TAB]", current_dir = Some(testdir_path)),
+        snapbox::str![".a_file"],
+    );
 }
 
 #[test]
 fn suggest_value_path_file() {
     let testdir = snapbox::dir::DirRoot::mutable_temp().unwrap();
     let testdir_path = testdir.path().unwrap();
+
     fs::write(testdir_path.join("a_file"), "").unwrap();
+    fs::write(testdir_path.join(".a_file"), "").unwrap();
     fs::write(testdir_path.join("b_file"), "").unwrap();
+    fs::write(testdir_path.join(".b_file"), "").unwrap();
     fs::create_dir_all(testdir_path.join("c_dir")).unwrap();
+    fs::create_dir_all(testdir_path.join(".c_dir")).unwrap();
     fs::create_dir_all(testdir_path.join("d_dir")).unwrap();
+    fs::create_dir_all(testdir_path.join(".d_dir")).unwrap();
 
     let mut cmd = Command::new("dynamic")
         .arg(
@@ -563,16 +605,34 @@ d_dir/
         complete!(cmd, "--input a[TAB]", current_dir = Some(testdir_path)),
         snapbox::str!["a_file"],
     );
+    assert_data_eq!(
+        complete!(cmd, "--input .[TAB]", current_dir = Some(testdir_path)),
+        snapbox::str![[r#"
+./a_file
+./b_file
+./c_dir/
+./d_dir/
+"#]],
+    );
+    assert_data_eq!(
+        complete!(cmd, "--input .a[TAB]", current_dir = Some(testdir_path)),
+        snapbox::str![".a_file"],
+    );
 }
 
 #[test]
 fn suggest_value_path_dir() {
     let testdir = snapbox::dir::DirRoot::mutable_temp().unwrap();
     let testdir_path = testdir.path().unwrap();
+
     fs::write(testdir_path.join("a_file"), "").unwrap();
+    fs::write(testdir_path.join(".a_file"), "").unwrap();
     fs::write(testdir_path.join("b_file"), "").unwrap();
+    fs::write(testdir_path.join(".b_file"), "").unwrap();
     fs::create_dir_all(testdir_path.join("c_dir")).unwrap();
+    fs::create_dir_all(testdir_path.join(".c_dir")).unwrap();
     fs::create_dir_all(testdir_path.join("d_dir")).unwrap();
+    fs::create_dir_all(testdir_path.join(".d_dir")).unwrap();
 
     let mut cmd = Command::new("dynamic")
         .arg(
@@ -597,6 +657,17 @@ d_dir/
     assert_data_eq!(
         complete!(cmd, "--input c[TAB]", current_dir = Some(testdir_path)),
         snapbox::str!["c_dir/"],
+    );
+    assert_data_eq!(
+        complete!(cmd, "--input .[TAB]", current_dir = Some(testdir_path)),
+        snapbox::str![[r#"
+./c_dir/
+./d_dir/
+"#]],
+    );
+    assert_data_eq!(
+        complete!(cmd, "--input .c[TAB]", current_dir = Some(testdir_path)),
+        snapbox::str![".c_dir/"],
     );
 }
 
@@ -680,15 +751,10 @@ baz
 #[test]
 fn suggest_multi_positional() {
     let mut cmd = Command::new("dynamic")
-        .arg(
-            clap::Arg::new("positional")
-                .value_parser(["pos_1, pos_2, pos_3"])
-                .index(1),
-        )
+        .arg(clap::Arg::new("positional-1").value_parser(["pos_1_a", "pos_1_b", "pos_1_c"]))
         .arg(
             clap::Arg::new("positional-2")
-                .value_parser(["pos_a", "pos_b", "pos_c"])
-                .index(2)
+                .value_parser(["pos_2_a", "pos_2_b", "pos_2_c"])
                 .num_args(3),
         )
         .arg(
@@ -699,45 +765,45 @@ fn suggest_multi_positional() {
         );
 
     assert_data_eq!(
-        complete!(cmd, "pos_1 pos_a [TAB]"),
+        complete!(cmd, "pos_1_a pos_2_a [TAB]"),
         snapbox::str![[r#"
-pos_a
-pos_b
-pos_c
+pos_2_a
+pos_2_b
+pos_2_c
 "#]]
     );
 
     assert_data_eq!(
-        complete!(cmd, "pos_1 pos_a pos_b [TAB]"),
+        complete!(cmd, "pos_1_a pos_2_a pos_2_b [TAB]"),
         snapbox::str![[r#"
-pos_a
-pos_b
-pos_c
+pos_2_a
+pos_2_b
+pos_2_c
 "#]]
     );
 
     assert_data_eq!(
-        complete!(cmd, "--format json pos_1 [TAB]"),
+        complete!(cmd, "--format json pos_1_a [TAB]"),
         snapbox::str![[r#"
-pos_a
-pos_b
-pos_c
+pos_2_a
+pos_2_b
+pos_2_c
 --format
 --help	Print help
 "#]]
     );
 
     assert_data_eq!(
-        complete!(cmd, "--format json pos_1 pos_a [TAB]"),
+        complete!(cmd, "--format json pos_1_a pos_2_a [TAB]"),
         snapbox::str![[r#"
-pos_a
-pos_b
-pos_c
+pos_2_a
+pos_2_b
+pos_2_c
 "#]]
     );
 
     assert_data_eq!(
-        complete!(cmd, "--format json pos_1 pos_a pos_b pos_c [TAB]"),
+        complete!(cmd, "--format json pos_1_a pos_2_a pos_2_b pos_2_c [TAB]"),
         snapbox::str![[r#"
 --format
 --help	Print help
@@ -745,26 +811,111 @@ pos_c
     );
 
     assert_data_eq!(
-        complete!(cmd, "--format json -- pos_1 pos_a [TAB]"),
+        complete!(cmd, "--format json -- pos_1_a pos_2_a [TAB]"),
         snapbox::str![[r#"
-pos_a
-pos_b
-pos_c
+pos_2_a
+pos_2_b
+pos_2_c
 "#]]
     );
 
     assert_data_eq!(
-        complete!(cmd, "--format json -- pos_1 pos_a pos_b [TAB]"),
+        complete!(cmd, "--format json -- pos_1_a pos_2_a pos_2_b [TAB]"),
         snapbox::str![[r#"
-pos_a
-pos_b
-pos_c
+pos_2_a
+pos_2_b
+pos_2_c
 "#]]
     );
 
     assert_data_eq!(
-        complete!(cmd, "--format json -- pos_1 pos_a pos_b pos_c [TAB]"),
+        complete!(
+            cmd,
+            "--format json -- pos_1_a pos_2_a pos_2_b pos_2_c [TAB]"
+        ),
         snapbox::str![]
+    );
+}
+
+#[test]
+fn suggest_multi_positional_unbounded() {
+    let mut cmd = Command::new("dynamic")
+        .arg(
+            clap::Arg::new("positional-1")
+                .value_parser(["pos_1_a", "pos_1_b", "pos_1_c"])
+                .num_args(2..),
+        )
+        .arg(
+            clap::Arg::new("--format")
+                .long("format")
+                .short('F')
+                .value_parser(["json", "yaml", "toml"]),
+        );
+
+    assert_data_eq!(
+        complete!(cmd, "pos_1_a [TAB]"),
+        snapbox::str![[r#"
+pos_1_a
+pos_1_b
+pos_1_c
+"#]]
+    );
+    assert_data_eq!(complete!(cmd, "pos_1_a --[TAB]"), snapbox::str![""]);
+    assert_data_eq!(
+        complete!(cmd, "pos_1_a --format [TAB]"),
+        snapbox::str![[r#"
+json
+yaml
+toml
+"#]]
+    );
+
+    assert_data_eq!(
+        complete!(cmd, "pos_1_a --format json [TAB]"),
+        snapbox::str![[r#"
+pos_1_a
+pos_1_b
+pos_1_c
+--format
+--help	Print help
+"#]]
+    );
+
+    assert_data_eq!(
+        complete!(cmd, "pos_1_a pos_1_b [TAB]"),
+        snapbox::str![[r#"
+pos_1_a
+pos_1_b
+pos_1_c
+--format
+--help	Print help
+"#]]
+    );
+    assert_data_eq!(
+        complete!(cmd, "pos_1_a pos_1_b --[TAB]"),
+        snapbox::str![[r#"
+--format
+--help	Print help
+"#]]
+    );
+    assert_data_eq!(
+        complete!(cmd, "pos_1_a pos_1_b --format [TAB]"),
+        snapbox::str![[r#"
+json
+yaml
+toml
+"#]]
+    );
+
+    assert_data_eq!(
+        complete!(cmd, "pos_1_a pos_1_b --format json [TAB]"),
+        snapbox::str![[r#"
+pos_1_a
+pos_1_b
+pos_1_c
+--format
+--help	Print help
+"#]]
     );
 }
 
@@ -784,7 +935,6 @@ fn suggest_delimiter_values() {
         )
         .arg(
             clap::Arg::new("pos")
-                .index(1)
                 .value_parser(["a_pos", "b_pos", "c_pos"])
                 .value_delimiter(','),
         );
@@ -904,8 +1054,6 @@ comma,tab
 a_pos
 b_pos
 c_pos
---delimiter
---help	Print help
 "#]]
     );
 
@@ -983,14 +1131,9 @@ fn suggest_positional_long_allow_hyphen() {
         .arg(
             clap::Arg::new("positional_a")
                 .value_parser(["--pos_a"])
-                .index(1)
                 .allow_hyphen_values(true),
         )
-        .arg(
-            clap::Arg::new("positional_b")
-                .index(2)
-                .value_parser(["pos_b"]),
-        );
+        .arg(clap::Arg::new("positional_b").value_parser(["pos_b"]));
 
     assert_data_eq!(
         complete!(cmd, "--format --json --pos[TAB]"),
@@ -1041,14 +1184,9 @@ fn suggest_positional_short_allow_hyphen() {
         .arg(
             clap::Arg::new("positional_a")
                 .value_parser(["-a"])
-                .index(1)
                 .allow_hyphen_values(true),
         )
-        .arg(
-            clap::Arg::new("positional_b")
-                .index(2)
-                .value_parser(["pos_b"]),
-        );
+        .arg(clap::Arg::new("positional_b").value_parser(["pos_b"]));
 
     assert_data_eq!(
         complete!(cmd, "--format --json -a [TAB]"),

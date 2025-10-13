@@ -1,11 +1,90 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](http://keepachangelog.com/)
-and this project adheres to [Semantic Versioning](http://semver.org/).
+The format is based on [Keep a Changelog](https://keepachangelog.com/)
+and this project adheres to [Semantic Versioning](https://semver.org/).
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+
+## [4.5.59] - 2025-10-13
+
+## [4.5.58] - 2025-09-16
+
+### Features
+
+- Recognize that after `--`, options should not be completed
+
+### Documentation
+
+- *(dynamic/fish)* Simplify setup instructions
+
+## [4.5.57] - 2025-08-11
+
+### Features
+
+- *(aot)* Hide `.file` paths by default
+
+## [4.5.56] - 2025-08-07
+
+### Features
+
+- *(aot)* Complete `~/` paths
+
+## [4.5.55] - 2025-07-09
+
+## [4.5.54] - 2025-06-09
+
+### Features
+
+- *(aot/zsh)* Revert to the default completions for external subcommands
+
+## [4.5.53] - 2025-06-09
+
+## [4.5.52] - 2025-05-30
+
+### Features
+
+- *(aot/zsh)* Fix handling of completing between spaces
+
+## [4.5.51] - 2025-05-27
+
+### Features
+
+- *(aot)* Add `Generator::try_generate`
+
+## [4.5.50] - 2025-05-06
+
+### Fixes
+
+- *(aot/bash)* Don't suggest subcommand arguments when cursor is before the subcommand
+
+## [4.5.49] - 2025-05-05
+
+### Fixes
+
+- *(dynamic/bash)* Improve handling of empty or quoted content
+- *(aot/bash)* Improve handling of empty or quoted content
+
+## [4.5.48] - 2025-04-28
+
+### Fixes
+
+- *(dynamic)* Restore nospace support
+
+## [4.5.47] - 2025-03-19
+
+### Features
+
+- *(dynamic)* Complete flags with variable-number of `num_args`
+
+## [4.5.46] - 2025-02-24
+
+## [4.5.45] - 2025-02-17
+
+### Fixes
+
+- *(dynamic)* Correctly complete option values based on `num_args`
 
 ## [4.5.44] - 2025-01-29
 
@@ -523,7 +602,22 @@ MSRV changed to 1.64.0
 ## [3.0.1] - 2022-01-03
 
 <!-- next-url -->
-[Unreleased]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.44...HEAD
+[Unreleased]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.59...HEAD
+[4.5.59]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.58...clap_complete-v4.5.59
+[4.5.58]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.57...clap_complete-v4.5.58
+[4.5.57]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.56...clap_complete-v4.5.57
+[4.5.56]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.55...clap_complete-v4.5.56
+[4.5.55]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.54...clap_complete-v4.5.55
+[4.5.54]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.53...clap_complete-v4.5.54
+[4.5.53]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.52...clap_complete-v4.5.53
+[4.5.52]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.51...clap_complete-v4.5.52
+[4.5.51]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.50...clap_complete-v4.5.51
+[4.5.50]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.49...clap_complete-v4.5.50
+[4.5.49]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.48...clap_complete-v4.5.49
+[4.5.48]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.47...clap_complete-v4.5.48
+[4.5.47]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.46...clap_complete-v4.5.47
+[4.5.46]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.45...clap_complete-v4.5.46
+[4.5.45]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.44...clap_complete-v4.5.45
 [4.5.44]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.43...clap_complete-v4.5.44
 [4.5.43]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.42...clap_complete-v4.5.43
 [4.5.42]: https://github.com/clap-rs/clap/compare/clap_complete-v4.5.41...clap_complete-v4.5.42

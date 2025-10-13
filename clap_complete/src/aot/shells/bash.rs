@@ -1,4 +1,7 @@
-use std::{fmt::Write as _, io::Write};
+use std::{
+    fmt::Write as _,
+    io::{Error, Write},
+};
 
 use clap::{Arg, Command, ValueHint};
 
@@ -14,6 +17,11 @@ impl Generator for Bash {
     }
 
     fn generate(&self, cmd: &Command, buf: &mut dyn Write) {
+        self.try_generate(cmd, buf)
+            .expect("failed to write completion file");
+    }
+
+    fn try_generate(&self, cmd: &Command, buf: &mut dyn Write) -> Result<(), Error> {
         let bin_name = cmd
             .get_bin_name()
             .expect("crate::generate should have set the bin_name");
@@ -25,12 +33,16 @@ impl Generator for Bash {
             "_{name}() {{
     local i cur prev opts cmd
     COMPREPLY=()
-    cur=\"${{COMP_WORDS[COMP_CWORD]}}\"
-    prev=\"${{COMP_WORDS[COMP_CWORD-1]}}\"
+    if [[ \"${{BASH_VERSINFO[0]}}\" -ge 4 ]]; then
+        cur=\"$2\"
+    else
+        cur=\"${{COMP_WORDS[COMP_CWORD]}}\"
+    fi
+    prev=\"$3\"
     cmd=\"\"
     opts=\"\"
 
-    for i in ${{COMP_WORDS[@]}}
+    for i in \"${{COMP_WORDS[@]:0:COMP_CWORD}}\"
     do
         case \"${{cmd}},${{i}}\" in
             \",$1\")
@@ -71,7 +83,7 @@ fi
             name_opts_details = option_details_for_path(cmd, bin_name),
             subcmds = all_subcommands(cmd, &fn_name),
             subcmd_details = subcommand_details(cmd)
-        ).expect("failed to write completion file");
+        )
     }
 }
 

@@ -1,6 +1,6 @@
 [package]
 name = "clap_complete"
-version = "4.5.44"
+version = "4.5.59"
 description = "Generate shell completion scripts for your clap::Command"
 categories = ["command-line-interface"]
 keywords = [
@@ -17,8 +17,7 @@ include.workspace = true
 
 [package.metadata.docs.rs]
 features = ["unstable-doc"]
-rustdoc-args = ["--cfg", "docsrs", "--generate-link-to-definition"]
-cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples"]
+rustdoc-args = ["--generate-link-to-definition"]
 
 [package.metadata.release]
 pre-release-replacements = [

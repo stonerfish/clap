@@ -1,6 +1,6 @@
 #![doc = include_str!("../README.md")]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/clap-rs/clap/master/assets/clap.png")]
-#![cfg_attr(docsrs, feature(doc_auto_cfg))]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 #![warn(clippy::print_stderr)]
@@ -347,3 +347,7 @@ fn app_has_arguments(cmd: &clap::Command) -> bool {
 fn app_has_subcommands(cmd: &clap::Command) -> bool {
     cmd.get_subcommands().any(|i| !i.is_hide_set())
 }
+
+#[doc = include_str!("../README.md")]
+#[cfg(doctest)]
+pub struct ReadmeDoctests;

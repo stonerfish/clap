@@ -1,11 +1,19 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](http://keepachangelog.com/)
-and this project adheres to [Semantic Versioning](http://semver.org/).
+The format is based on [Keep a Changelog](https://keepachangelog.com/)
+and this project adheres to [Semantic Versioning](https://semver.org/).
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+
+## [4.5.9] - 2025-10-13
+
+## [4.5.8] - 2025-07-09
+
+## [4.5.7] - 2025-06-09
+
+## [4.5.6] - 2025-05-27
 
 ## [4.5.5] - 2025-01-02
 
@@ -52,7 +60,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [4.3.0] - 2023-05-24
 
 <!-- next-url -->
-[Unreleased]: https://github.com/clap-rs/clap/compare/clap_complete_nushell-v4.5.5...HEAD
+[Unreleased]: https://github.com/clap-rs/clap/compare/clap_complete_nushell-v4.5.9...HEAD
+[4.5.9]: https://github.com/clap-rs/clap/compare/clap_complete_nushell-v4.5.8...clap_complete_nushell-v4.5.9
+[4.5.8]: https://github.com/clap-rs/clap/compare/clap_complete_nushell-v4.5.7...clap_complete_nushell-v4.5.8
+[4.5.7]: https://github.com/clap-rs/clap/compare/clap_complete_nushell-v4.5.6...clap_complete_nushell-v4.5.7
+[4.5.6]: https://github.com/clap-rs/clap/compare/clap_complete_nushell-v4.5.5...clap_complete_nushell-v4.5.6
 [4.5.5]: https://github.com/clap-rs/clap/compare/clap_complete_nushell-v4.5.4...clap_complete_nushell-v4.5.5
 [4.5.4]: https://github.com/clap-rs/clap/compare/clap_complete_nushell-v4.5.3...clap_complete_nushell-v4.5.4
 [4.5.3]: https://github.com/clap-rs/clap/compare/clap_complete_nushell-v4.5.2...clap_complete_nushell-v4.5.3

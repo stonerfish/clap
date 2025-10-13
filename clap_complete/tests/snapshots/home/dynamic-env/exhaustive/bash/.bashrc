@@ -10,16 +10,21 @@ _clap_complete_exhaustive() {
     else
         local _CLAP_COMPLETE_SPACE=true
     fi
+    local words=("${COMP_WORDS[@]}")
+    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+        words[COMP_CWORD]="$2"
+    fi
     COMPREPLY=( $( \
         _CLAP_IFS="$IFS" \
         _CLAP_COMPLETE_INDEX="$_CLAP_COMPLETE_INDEX" \
         _CLAP_COMPLETE_COMP_TYPE="$_CLAP_COMPLETE_COMP_TYPE" \
+        _CLAP_COMPLETE_SPACE="$_CLAP_COMPLETE_SPACE" \
         COMPLETE="bash" \
-        "exhaustive" -- "${COMP_WORDS[@]}" \
+        "exhaustive" -- "${words[@]}" \
     ) )
     if [[ $? != 0 ]]; then
         unset COMPREPLY
-    elif [[ $SUPPRESS_SPACE == 1 ]] && [[ "${COMPREPLY-}" =~ [=/:]$ ]]; then
+    elif [[ $_CLAP_COMPLETE_SPACE == false ]] && [[ "${COMPREPLY-}" =~ [=/:]$ ]]; then
         compopt -o nospace
     fi
 }

@@ -83,6 +83,18 @@ fn sub_subcommands() {
 }
 
 #[test]
+fn external_subcommands() {
+    let name = "my-app";
+    let cmd = common::external_subcommand(name);
+    common::assert_matches(
+        snapbox::file!["../snapshots/external_subcommands.zsh"],
+        clap_complete::shells::Zsh,
+        cmd,
+        name,
+    );
+}
+
+#[test]
 fn custom_bin_name() {
     let name = "my-app";
     let bin_name = "bin-name";
@@ -325,6 +337,36 @@ fn complete_dynamic_empty_option_value() {
 
     let input = "exhaustive --empty=\t";
     let expected = snapbox::str!["% exhaustive --empty="];
+    let actual = runtime.complete(input, &term).unwrap();
+    assert_data_eq!(actual, expected);
+}
+
+#[test]
+#[cfg(all(unix, feature = "unstable-dynamic"))]
+#[cfg(feature = "unstable-shell-tests")]
+fn complete_dynamic_empty_space() {
+    if !common::has_command(CMD) {
+        return;
+    }
+
+    let term = completest::Term::new();
+    let mut runtime = common::load_runtime::<RuntimeBuilder>("dynamic-env", "exhaustive");
+
+    // Press left arrow twice to place cursor between the two spaces
+    let input = "exhaustive quote  -\x1b[D\x1b[D\t\t";
+    let expected = snapbox::str![[r#"
+% exhaustive quote  -
+--help                              -- Print help (see more with '--help')                                            
+cmd-backslash      --backslash      -- Avoid '/n'                                                                     
+cmd-backticks      --backticks      -- For more information see `echo test`                                           
+cmd-brackets       --brackets       -- List packages [filter]                                                         
+cmd-double-quotes  --double-quotes  -- Can be "always", "auto", or "never"                                            
+cmd-expansions     --expansions     -- Execute the shell command with $SHELL                                          
+cmd-single-quotes  --single-quotes  -- Can be 'always', 'auto', or 'never'                                            
+escape-help                         -- /tab/t"'                                                                       
+help                                -- Print this message or the help of the given subcommand(s)                      
+--choice
+"#]];
     let actual = runtime.complete(input, &term).unwrap();
     assert_data_eq!(actual, expected);
 }

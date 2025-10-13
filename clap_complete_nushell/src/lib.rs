@@ -16,7 +16,7 @@
 //! ```
 
 #![doc(html_logo_url = "https://raw.githubusercontent.com/clap-rs/clap/master/assets/clap.png")]
-#![cfg_attr(docsrs, feature(doc_auto_cfg))]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 #![warn(clippy::print_stderr)]
@@ -36,6 +36,15 @@ impl Generator for Nushell {
     }
 
     fn generate(&self, cmd: &Command, buf: &mut dyn std::io::Write) {
+        self.try_generate(cmd, buf)
+            .expect("failed to write completion file");
+    }
+
+    fn try_generate(
+        &self,
+        cmd: &Command,
+        buf: &mut dyn std::io::Write,
+    ) -> Result<(), std::io::Error> {
         let mut completions = String::new();
 
         completions.push_str("module completions {\n\n");
@@ -50,7 +59,6 @@ impl Generator for Nushell {
         completions.push_str("export use completions *\n");
 
         buf.write_all(completions.as_bytes())
-            .expect("Failed to write to generated file");
     }
 }
 
@@ -227,3 +235,7 @@ fn generate_completion(completions: &mut String, cmd: &Command, is_subcommand: b
 fn single_line_styled_str(text: &StyledStr) -> String {
     text.to_string().replace('\n', " ")
 }
+
+#[doc = include_str!("../README.md")]
+#[cfg(doctest)]
+pub struct ReadmeDoctests;

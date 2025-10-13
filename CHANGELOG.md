@@ -1,10 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](http://keepachangelog.com/)
-and this project adheres to [Semantic Versioning](http://semver.org/).
+The format is based on [Keep a Changelog](https://keepachangelog.com/)
+and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## 5.0.0 - 2022-11-24
+## 5.0.0 - TBD
+
+*available through `unstable-v5` feature flag*
 
 ### Breaking Changes
 
@@ -12,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - *(help)* Change default `Command::term_width` to "source format"
 - *(help)* Change default `Command::max_term_width` to 100
 - *(derive)* `Vec<Vec<T>>` types are now assuming to capture occurrences
+- *(derive)* `ValueEnum` variants now use the full doc comment, not summary, for `PossibleValue::help`
 
 ### Features
 
@@ -19,6 +22,147 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+
+## [4.5.49] - 2025-10-13
+
+### Fixes
+
+- *(help)* Correctly wrap when ANSI escape codes are present
+
+## [4.5.48] - 2025-09-19
+
+### Documentation
+
+- Add a new CLI Concepts document as another way of framing clap
+- Expand the `typed_derive` cookbook entry
+
+## [4.5.47] - 2025-09-02
+
+### Features
+
+- Added `impl FromArgMatches for ()`
+- Added `impl Args for ()`
+- Added `impl Subcommand for ()`
+- Added `impl FromArgMatches for Infallible`
+- Added `impl Subcommand for Infallible`
+
+### Fixes
+
+- *(derive)* Update runtime error text to match `clap`
+
+## [4.5.46] - 2025-08-26
+
+### Features
+
+- Expose `StyledStr::push_str`
+
+## [4.5.45] - 2025-08-12
+
+### Fixes
+
+- *(unstable-v5)* `ValueEnum` variants now use the full doc comment, not summary, for `PossibleValue::help`
+
+## [4.5.44] - 2025-08-11
+
+### Features
+
+- Add `Command::mut_subcommands`
+
+## [4.5.43] - 2025-08-06
+
+### Fixes
+
+- *(help)* In long help, list Possible Values before defaults, rather than after, for a more consistent look
+
+## [4.5.42] - 2025-07-30
+
+### Fixes
+
+- Include subcommand visible long aliases in `--help`
+
+## [4.5.41] - 2025-07-09
+
+### Features
+
+- Add `Styles::context` and `Styles::context_value` to customize the styling of `[default: value]` like notes in the `--help`
+
+## [4.5.40] - 2025-06-09
+
+### Features
+
+- Support quoted ids in `arg!()` macro (e.g. `arg!("check-config": ...)`)
+
+## [4.5.39] - 2025-05-27
+
+### Fixes
+
+- *(help)* Show short flag aliases before long
+- *(help)* Merge the short and long flag alias lists
+
+## [4.5.38] - 2025-05-11
+
+### Fixes
+
+- *(help)* When showing aliases, include leading `--` or `-`
+
+## [4.5.37] - 2025-04-18
+
+### Features
+
+- Added `ArgMatches::try_clear_id()`
+
+## [4.5.36] - 2025-04-11
+
+### Fixes
+
+- *(help)* Revert 4.5.35's "Don't leave space for shorts if there are none" for now
+
+## [4.5.35] - 2025-04-01
+
+### Fixes
+
+- *(help)* Align positionals and flags when put in the same `help_heading`
+- *(help)* Don't leave space for shorts if there are none
+
+## [4.5.34] - 2025-03-27
+
+### Fixes
+
+- *(help)* Don't add extra blank lines with `flatten_help(true)` and subcommands without arguments
+
+## [4.5.33] - 2025-03-26
+
+### Fixes
+
+- *(error)* When showing the usage of a suggestion for an unknown argument, don't show the group
+
+## [4.5.32] - 2025-03-10
+
+### Features
+
+- Add `Error::remove`
+
+### Documentation
+
+- *(cookbook)* Switch from `humantime` to `jiff`
+- *(tutorial)* Better cover required vs optional
+
+### Internal
+
+- Update `pulldown-cmark`
+
+## [4.5.31] - 2025-02-24
+
+### Features
+
+- Add `ValueParserFactory` for `Saturating<T>`
+
+## [4.5.30] - 2025-02-17
+
+### Fixes
+
+- *(assert)* Allow `num_args(0..=1)` to be used with `SetTrue`
+- *(assert)* Clean up rendering of `takes_values` assertions
 
 ## [4.5.29] - 2025-02-11
 
@@ -4707,7 +4851,27 @@ Minimum version of Rust is now v1.13.0 (Stable)
 * **arg**  allow lifetimes other than 'static in arguments ([9e8c1fb9](https://github.com/clap-rs/clap/commit/9e8c1fb9406f8448873ca58bab07fe905f1551e5))
 
 <!-- next-url -->
-[Unreleased]: https://github.com/clap-rs/clap/compare/v4.5.29...HEAD
+[Unreleased]: https://github.com/clap-rs/clap/compare/v4.5.49...HEAD
+[4.5.49]: https://github.com/clap-rs/clap/compare/v4.5.48...v4.5.49
+[4.5.48]: https://github.com/clap-rs/clap/compare/v4.5.47...v4.5.48
+[4.5.47]: https://github.com/clap-rs/clap/compare/v4.5.46...v4.5.47
+[4.5.46]: https://github.com/clap-rs/clap/compare/v4.5.45...v4.5.46
+[4.5.45]: https://github.com/clap-rs/clap/compare/v4.5.44...v4.5.45
+[4.5.44]: https://github.com/clap-rs/clap/compare/v4.5.43...v4.5.44
+[4.5.43]: https://github.com/clap-rs/clap/compare/v4.5.42...v4.5.43
+[4.5.42]: https://github.com/clap-rs/clap/compare/v4.5.41...v4.5.42
+[4.5.41]: https://github.com/clap-rs/clap/compare/v4.5.40...v4.5.41
+[4.5.40]: https://github.com/clap-rs/clap/compare/v4.5.39...v4.5.40
+[4.5.39]: https://github.com/clap-rs/clap/compare/v4.5.38...v4.5.39
+[4.5.38]: https://github.com/clap-rs/clap/compare/v4.5.37...v4.5.38
+[4.5.37]: https://github.com/clap-rs/clap/compare/v4.5.36...v4.5.37
+[4.5.36]: https://github.com/clap-rs/clap/compare/v4.5.35...v4.5.36
+[4.5.35]: https://github.com/clap-rs/clap/compare/v4.5.34...v4.5.35
+[4.5.34]: https://github.com/clap-rs/clap/compare/v4.5.33...v4.5.34
+[4.5.33]: https://github.com/clap-rs/clap/compare/v4.5.32...v4.5.33
+[4.5.32]: https://github.com/clap-rs/clap/compare/v4.5.31...v4.5.32
+[4.5.31]: https://github.com/clap-rs/clap/compare/v4.5.30...v4.5.31
+[4.5.30]: https://github.com/clap-rs/clap/compare/v4.5.29...v4.5.30
 [4.5.29]: https://github.com/clap-rs/clap/compare/v4.5.28...v4.5.29
 [4.5.28]: https://github.com/clap-rs/clap/compare/v4.5.27...v4.5.28
 [4.5.27]: https://github.com/clap-rs/clap/compare/v4.5.26...v4.5.27

@@ -295,6 +295,16 @@ pub(crate) fn complete_path(
     let current = current.to_string_lossy();
     let search_root = if prefix.is_absolute() {
         prefix.to_owned()
+    } else if prefix.iter().next() == Some(OsStr::new("~")) {
+        let prefix = prefix.strip_prefix("~").unwrap_or(prefix);
+        let home_dir = match std::env::home_dir() {
+            Some(home_dir) => home_dir,
+            None => {
+                // Can't complete without a `home_dir`
+                return completions;
+            }
+        };
+        home_dir.join(prefix)
     } else {
         let current_dir = match current_dir {
             Some(current_dir) => current_dir,
@@ -323,9 +333,10 @@ pub(crate) fn complete_path(
         }
 
         if entry.metadata().map(|m| m.is_dir()).unwrap_or(false) {
-            let mut suggestion = prefix.join(raw_file_name);
+            let mut suggestion = prefix.join(&raw_file_name);
             suggestion.push(""); // Ensure trailing `/`
-            let candidate = CompletionCandidate::new(suggestion.as_os_str().to_owned());
+            let candidate = CompletionCandidate::new(suggestion.as_os_str().to_owned())
+                .hide(is_hidden(&raw_file_name));
 
             if is_wanted(&entry.path()) {
                 completions.push(candidate);
@@ -334,8 +345,9 @@ pub(crate) fn complete_path(
             }
         } else {
             if is_wanted(&entry.path()) {
-                let suggestion = prefix.join(raw_file_name);
-                let candidate = CompletionCandidate::new(suggestion.as_os_str().to_owned());
+                let suggestion = prefix.join(&raw_file_name);
+                let candidate = CompletionCandidate::new(suggestion.as_os_str().to_owned())
+                    .hide(is_hidden(&raw_file_name));
                 completions.push(candidate);
             }
         }
@@ -345,6 +357,10 @@ pub(crate) fn complete_path(
     completions.extend(potential);
 
     completions
+}
+
+fn is_hidden(file_name: &OsStr) -> bool {
+    file_name.starts_with(".")
 }
 
 fn split_file_name(path: &std::path::Path) -> (&std::path::Path, &OsStr) {
